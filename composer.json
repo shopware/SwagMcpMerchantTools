@@ -1,0 +1,60 @@
+{
+    "name": "swag/mcp-merchant-assistant",
+    "description": "Merchant-oriented MCP capability plugin for Shopware — workflow tools for orders, customers, products, storefront, and reporting",
+    "version": "0.0.1",
+    "type": "shopware-platform-plugin",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2",
+        "shopware/core": ">=6.7.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Swag\\McpMerchantAssistant\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Swag\\McpMerchantAssistant\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "../../../vendor/bin/phpunit",
+        "phpstan": "../../../vendor/bin/phpstan analyse --memory-limit=2G -vv",
+        "cs": "../../../vendor/bin/php-cs-fixer fix --dry-run --diff",
+        "cs-fix": "../../../vendor/bin/php-cs-fixer fix -v",
+        "ecs": [
+            "echo \"\\e[31mDeprecated! Use 'cs' instead\\n\\e[0m\"",
+            "../../../vendor/bin/php-cs-fixer fix --dry-run --diff"
+        ],
+        "ecs-fix": [
+            "echo \"\\e[31mDeprecated! Use 'cs-fix' instead\\n\\e[0m\"",
+            "../../../vendor/bin/php-cs-fixer fix -v"
+        ],
+        "ci": [
+            "@phpstan",
+            "@cs",
+            "@test"
+        ]
+    },
+    "scripts-descriptions": {
+        "test": "Runs the PHPUnit test suite",
+        "phpstan": "Runs PHPStan for static analysis",
+        "cs": "Runs the code style check",
+        "cs-fix": "Runs the code style fixer and fixes issues if possible",
+        "ecs": "Runs the code style check. Deprecated! Use 'cs' instead",
+        "ecs-fix": "Runs the code style fixer and fixes issues if possible. Deprecated! Use 'cs-fix' instead",
+        "ci": "Runs all CI checks"
+    },
+    "extra": {
+        "shopware-plugin-class": "Swag\\McpMerchantAssistant\\SwagMcpMerchantAssistant",
+        "label": {
+            "de-DE": "MCP Merchant Assistant",
+            "en-GB": "MCP Merchant Assistant"
+        },
+        "description": {
+            "de-DE": "Merchant-orientierte MCP-Workflow-Tools für Bestellungen, Kunden, Produkte, Storefront und Reporting",
+            "en-GB": "Merchant-oriented MCP workflow tools for orders, customers, products, storefront, and reporting"
+        }
+    }
+}
