@@ -1,0 +1,16 @@
+includes:
+    - ../../../src/Core/DevOps/StaticAnalyze/PHPStan/common.neon
+
+parameters:
+    tmpDir: ../../../var/cache/phpstan-swag-mcp-merchant-assistant
+    paths:
+        - src
+        - tests
+
+    bootstrapFiles:
+        - ../../../src/Core/DevOps/StaticAnalyze/phpstan-bootstrap.php
+
+    symfony:
+        constantHassers: false
+
+    ignoreErrors: []

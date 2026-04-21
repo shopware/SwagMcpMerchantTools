@@ -1,0 +1,87 @@
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+
+        <service id="Swag\McpMerchantAssistant\Mcp\Prompt\MerchantContextPrompt">
+            <tag name="shopware.mcp.prompt"/>
+            <tag name="shopware.feature" flag="MCP_SERVER"/>
+        </service>
+
+        <service id="Swag\McpMerchantAssistant\Tool\OrderSummaryTool">
+            <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry"/>
+            <argument type="service" id="Shopware\Core\Framework\Mcp\Context\McpContextProvider"/>
+            <tag name="shopware.mcp.tool"/>
+            <tag name="shopware.feature" flag="MCP_SERVER"/>
+        </service>
+
+        <service id="Swag\McpMerchantAssistant\Tool\CustomerLookupTool">
+            <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry"/>
+            <argument type="service" id="Shopware\Core\Framework\Mcp\Context\McpContextProvider"/>
+            <tag name="shopware.mcp.tool"/>
+            <tag name="shopware.feature" flag="MCP_SERVER"/>
+        </service>
+
+        <service id="Swag\McpMerchantAssistant\Tool\ProductCreateTool">
+            <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry"/>
+            <argument type="service" id="Shopware\Core\Framework\Mcp\Context\McpContextProvider"/>
+            <tag name="shopware.mcp.tool"/>
+            <tag name="shopware.feature" flag="MCP_SERVER"/>
+        </service>
+
+        <service id="Swag\McpMerchantAssistant\Tool\RevenueReportTool">
+            <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry"/>
+            <argument type="service" id="Shopware\Core\Framework\Mcp\Context\McpContextProvider"/>
+            <tag name="shopware.mcp.tool"/>
+            <tag name="shopware.feature" flag="MCP_SERVER"/>
+        </service>
+
+        <service id="Swag\McpMerchantAssistant\Tool\BestsellerReportTool">
+            <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry"/>
+            <argument type="service" id="Shopware\Core\Framework\Mcp\Context\McpContextProvider"/>
+            <tag name="shopware.mcp.tool"/>
+            <tag name="shopware.feature" flag="MCP_SERVER"/>
+        </service>
+
+        <service id="Swag\McpMerchantAssistant\Tool\StorefrontSearchTool">
+            <argument type="service" id="Shopware\Core\System\SalesChannel\Context\SalesChannelContextService"/>
+            <argument type="service" id="sales_channel.product.repository"/>
+            <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry"/>
+            <argument type="service" id="api.request_criteria_builder"/>
+            <argument type="service" id="Shopware\Core\Framework\Api\Serializer\JsonEntityEncoder"/>
+            <argument type="service" id="Shopware\Core\Framework\Mcp\Context\McpContextProvider"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <tag name="shopware.mcp.tool"/>
+            <tag name="shopware.feature" flag="MCP_SERVER"/>
+        </service>
+
+        <service id="Swag\McpMerchantAssistant\Tool\CartManageTool">
+            <argument type="service" id="Shopware\Core\System\SalesChannel\Context\SalesChannelContextService"/>
+            <argument type="service" id="Shopware\Core\Checkout\Cart\SalesChannel\CartService"/>
+            <argument type="service" id="Shopware\Core\Framework\Mcp\Context\McpContextProvider"/>
+            <tag name="shopware.mcp.tool"/>
+            <tag name="shopware.feature" flag="MCP_SERVER"/>
+        </service>
+
+        <service id="Swag\McpMerchantAssistant\Tool\CartCheckoutTool">
+            <argument type="service" id="Shopware\Core\System\SalesChannel\Context\SalesChannelContextService"/>
+            <argument type="service" id="Shopware\Core\Checkout\Cart\SalesChannel\CartService"/>
+            <argument type="service" id="Shopware\Core\Framework\Mcp\Context\McpContextProvider"/>
+            <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry"/>
+            <tag name="shopware.mcp.tool"/>
+            <tag name="shopware.feature" flag="MCP_SERVER"/>
+        </service>
+
+        <service id="Swag\McpMerchantAssistant\Tool\CheckoutMethodsTool">
+            <argument type="service" id="Shopware\Core\System\SalesChannel\Context\SalesChannelContextService"/>
+            <argument type="service" id="Shopware\Core\Checkout\Payment\SalesChannel\PaymentMethodRoute"/>
+            <argument type="service" id="Shopware\Core\Checkout\Shipping\SalesChannel\ShippingMethodRoute"/>
+            <argument type="service" id="Shopware\Core\Framework\Mcp\Context\McpContextProvider"/>
+            <tag name="shopware.mcp.tool"/>
+            <tag name="shopware.feature" flag="MCP_SERVER"/>
+        </service>
+
+    </services>
+</container>
