@@ -47,10 +47,21 @@ The bootstrap class (`SwagMcpMerchantAssistant.php`) guards `build()` with `Feat
 - Write tools: accept `bool $dryRun = true` and use `executeWithDryRun()` for automatic transaction rollback and exception handling
 - Prefer human-readable inputs (tax rate as float, currency as ISO code, category as name) — resolve to UUIDs internally
 - Validate entity existence with `$registry->has($entity)` before ACL checks to produce clear error messages
+- Declare tool prerequisites with `#[McpToolDependsOn('merchant-tool-name')]` when one tool only works after another has been called (e.g., `merchant-cart-checkout` depends on `merchant-cart-manage`)
 
 ## Tests
 
 Unit tests live in `tests/unit/Tool/`. Mock DAL services and `McpContextProvider`. Do not use integration test infrastructure — unit tests only.
+
+## Security layers
+
+Requests to merchant tools pass through the same three layers as all MCP tools:
+
+1. **Authentication** — credentials from `.mcp.json` (`sw-access-key` + `sw-secret-access-key`)
+2. **Per-integration allowlist** — tool must be enabled in Settings → Integrations → Edit MCP Tools; error: `Tool "X" is not in the allowlist for this integration. Enable it under Settings → Integrations → Edit MCP Tools.`
+3. **ACL** — integration role must have the required privileges; error: `Missing privilege: sales_channel:read`
+
+See `src/Core/Framework/Mcp/docs/security.md` for the full layer reference and troubleshooting table.
 
 ## Core conventions
 

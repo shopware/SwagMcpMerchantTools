@@ -19,17 +19,17 @@
         }
     },
     "scripts": {
-        "test": "../../../vendor/bin/phpunit",
-        "phpstan": "../../../vendor/bin/phpstan analyse --memory-limit=2G -vv",
-        "cs": "../../../vendor/bin/php-cs-fixer fix --dry-run --diff",
-        "cs-fix": "../../../vendor/bin/php-cs-fixer fix -v",
+        "test": "@php bin/run.php phpunit",
+        "phpstan": "@php bin/run.php phpstan analyse --memory-limit=2G -vv",
+        "cs": "@php bin/run.php php-cs-fixer fix --dry-run --diff",
+        "cs-fix": "@php bin/run.php php-cs-fixer fix -v",
         "ecs": [
             "echo \"\\e[31mDeprecated! Use 'cs' instead\\n\\e[0m\"",
-            "../../../vendor/bin/php-cs-fixer fix --dry-run --diff"
+            "@cs"
         ],
         "ecs-fix": [
             "echo \"\\e[31mDeprecated! Use 'cs-fix' instead\\n\\e[0m\"",
-            "../../../vendor/bin/php-cs-fixer fix -v"
+            "@cs-fix"
         ],
         "ci": [
             "@phpstan",

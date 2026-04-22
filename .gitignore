@@ -6,3 +6,5 @@
 /var/
 /.phpunit.cache/
 composer.lock
+/phpstan.neon
+

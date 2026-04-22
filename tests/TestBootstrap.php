@@ -1,51 +1,44 @@
 <?php declare(strict_types=1);
 
+use Composer\InstalledVersions;
 use Shopware\Core\TestBootstrapper;
 
-function getProjectDir(): string
+/**
+ * Locates Shopware core's TestBootstrapper.php regardless of whether this
+ * plugin lives at custom/plugins/{name}/ (monorepo), vendor/swag/{name}/
+ * (composer-installed), or is a standalone clone with its own vendor/.
+ */
+function locateShopwareCore(): string
 {
-    if (isset($_SERVER['PROJECT_ROOT']) && is_string($_SERVER['PROJECT_ROOT']) && \is_dir($_SERVER['PROJECT_ROOT'])) {
-        return $_SERVER['PROJECT_ROOT'];
+    // composer-installed or standalone-clone cases
+    $installed = InstalledVersions::getInstallPath('shopware/core');
+    if (\is_string($installed) && is_file($installed . '/TestBootstrapper.php')) {
+        return $installed;
     }
 
-    $rootDir = dirname(__DIR__, 2);
-    $dir = $rootDir;
-    while (!\is_file($dir . '/.env') && !\is_file($dir . '/devenv.nix')) {
-        if ($dir === \dirname($dir)) {
-            return $rootDir;
-        }
-        $dir = \dirname($dir);
+    // monorepo: plugin at custom/plugins/{name}/tests/, core at {project}/src/Core
+    $monorepo = \dirname(__DIR__, 4) . '/src/Core';
+    if (is_file($monorepo . '/TestBootstrapper.php')) {
+        return $monorepo;
     }
 
-    chdir($dir);
-
-    return $dir;
+    throw new RuntimeException('Could not locate shopware/core TestBootstrapper.');
 }
 
-$testProjectDir = getProjectDir();
-$bootstrapLocations = [
-    $testProjectDir . '/src/Core/TestBootstrapper.php',
-    $testProjectDir . '/vendor/shopware/core/TestBootstrapper.php',
-    $testProjectDir . '/vendor/shopware/platform/src/Core/TestBootstrapper.php',
-];
+$corePath = locateShopwareCore();
+require_once $corePath . '/TestBootstrapper.php';
 
-foreach ($bootstrapLocations as $file) {
-    if (is_file($file)) {
-        require_once $file;
-
-        break;
-    }
-}
+$projectDir = \dirname($corePath, \str_ends_with($corePath, '/src/Core') ? 2 : 3);
 
 $classLoader = (new TestBootstrapper())
-    ->setProjectDir($testProjectDir)
+    ->setProjectDir($projectDir)
     ->setLoadEnvFile(true)
     ->addCallingPlugin()
     ->bootstrap()
     ->getClassLoader();
 
 // Register the plugin's own autoload PSR-4 since it is not composer-installed
-$pluginDir = dirname(__DIR__);
+$pluginDir = \dirname(__DIR__);
 $composerJson = json_decode((string) file_get_contents($pluginDir . '/composer.json'), true, 512, \JSON_THROW_ON_ERROR);
 foreach ($composerJson['autoload']['psr-4'] ?? [] as $namespace => $path) {
     $classLoader->addPsr4($namespace, $pluginDir . '/' . $path);
