@@ -10,6 +10,7 @@ use Shopware\Core\Checkout\Order\OrderEntity;
 use Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Shopware\Core\Framework\Mcp\Attribute\McpToolRequires;
 use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
 use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
 
@@ -17,6 +18,7 @@ use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
  */
 #[McpTool(name: 'merchant-order-summary', description: 'Look up an order by order number or UUID and get a pre-formatted summary with customer info, line items, payment status, and delivery status. Provide either orderNumber (e.g. "10001") or orderId (UUID). Returns {success, data: {id, orderNumber, status, amountTotal, customer, lineItems, transactions, deliveries}}.')]
+#[McpToolRequires('order:read')]
 class OrderSummaryTool extends McpToolResponse
 {
     /**

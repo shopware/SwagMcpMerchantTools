@@ -6,6 +6,7 @@ use Mcp\Capability\Attribute\McpTool;
 use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Checkout\Cart\LineItem\LineItem;
 use Shopware\Core\Checkout\Cart\SalesChannel\CartService;
+use Shopware\Core\Framework\Mcp\Attribute\McpToolRequires;
 use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
 use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
 use Shopware\Core\Framework\Util\Random;
@@ -16,6 +17,7 @@ use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceParamete
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
  */
 #[McpTool(name: 'merchant-cart-manage', description: 'Manage a storefront shopping cart. Actions: "create" (new cart, returns token), "add" (add product by productId), "remove" (remove by lineItemId), "update" (change quantity by lineItemId), "get" (view current cart). Requires salesChannelId (see shopware://sales-channels resource). All actions except "create" require the token returned by "create". Optionally pass customerId for customer-specific pricing.')]
+#[McpToolRequires('sales_channel:read')]
 class CartManageTool extends McpToolResponse
 {
     /**

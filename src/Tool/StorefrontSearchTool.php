@@ -10,6 +10,7 @@ use Shopware\Core\Framework\Api\Serializer\JsonEntityEncoder;
 use Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\RequestCriteriaBuilder;
+use Shopware\Core\Framework\Mcp\Attribute\McpToolRequires;
 use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
 use Shopware\Core\Framework\Mcp\Tool\McpEntityIncludes;
 use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
@@ -26,6 +27,7 @@ use Shopware\Core\System\SalesChannel\Entity\SalesChannelRepository;
  * customer group pricing, and visibility rules.
  */
 #[McpTool(name: 'merchant-storefront-search', description: 'Search products with storefront context. Returns prices resolved for the sales channel including customer group pricing, tax rules, and product visibility. Use the properties parameter to filter by human-readable property names (e.g. {"Color": "Red", "Size": "42"}) -- the tool resolves names to IDs automatically. Use term for full-text search. Requires a salesChannelId (see shopware://sales-channels resource); optionally pass customerId for customer-specific pricing.')]
+#[McpToolRequires('sales_channel:read')]
 class StorefrontSearchTool extends McpToolResponse
 {
     use McpEntityIncludes;

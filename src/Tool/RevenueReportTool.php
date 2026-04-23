@@ -17,6 +17,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\MultiFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\NotFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\RangeFilter;
+use Shopware\Core\Framework\Mcp\Attribute\McpToolRequires;
 use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
 use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
 
@@ -24,6 +25,7 @@ use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
  */
 #[McpTool(name: 'merchant-revenue-report', description: 'Generate a revenue report for a date range. Provide ISO 8601 dates (e.g. "2025-01-01"). Excludes cancelled orders. Optional groupBy: day (default), week, month. Use page/limit to paginate the timeline buckets. Returns {success, data: {period, totalRevenue, orderCount, averageOrderValue, timeline: [{date, revenue}]}, _meta: {page, limit, total}}.')]
+#[McpToolRequires('order:read')]
 class RevenueReportTool extends McpToolResponse
 {
     /**

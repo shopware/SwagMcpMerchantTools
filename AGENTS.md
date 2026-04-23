@@ -48,6 +48,7 @@ The bootstrap class (`SwagMcpMerchantAssistant.php`) guards `build()` with `Feat
 - Prefer human-readable inputs (tax rate as float, currency as ISO code, category as name) — resolve to UUIDs internally
 - Validate entity existence with `$registry->has($entity)` before ACL checks to produce clear error messages
 - Declare tool prerequisites with `#[McpToolDependsOn('merchant-tool-name')]` when one tool only works after another has been called (e.g., `merchant-cart-checkout` depends on `merchant-cart-manage`)
+- Declare required ACL privileges with `#[McpToolRequires('entity:operation')]` (repeatable) — this is informational only and helps operators configure roles correctly. Still call `$this->requirePrivilege($context, ...)` inside `__invoke()` for actual runtime enforcement. See `src/Core/Framework/Mcp/Tool/AGENTS.md` for both static and dynamic forms
 
 ## Tests
 
