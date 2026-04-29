@@ -47,6 +47,7 @@ The bootstrap class (`SwagMcpMerchantAssistant.php`) guards `build()` with `Feat
 - Write tools: accept `bool $dryRun = true` and use `executeWithDryRun()` for automatic transaction rollback and exception handling
 - Prefer human-readable inputs (tax rate as float, currency as ISO code, category as name) — resolve to UUIDs internally
 - Validate entity existence with `$registry->has($entity)` before ACL checks to produce clear error messages
+- Make rarely-supplied parameters optional in the PHP signature (`string $salesChannelId = ''`) and validate inside the method. Required-but-missing parameters cause some agents (notably GPT-4o) to refuse the tool call entirely instead of asking the user for the value. `StorefrontSearchTool` follows this pattern: `salesChannelId` defaults to `''` and the tool returns an actionable error if empty
 - Declare tool prerequisites with `#[McpToolDependsOn('merchant-tool-name')]` when one tool only works after another has been called (e.g., `merchant-cart-checkout` depends on `merchant-cart-manage`)
 - Declare required ACL privileges with `#[McpToolRequires('entity:operation')]` (repeatable) — this is informational only and helps operators configure roles correctly. Still call `$this->requirePrivilege($context, ...)` inside `__invoke()` for actual runtime enforcement. See `src/Core/Framework/Mcp/Tool/AGENTS.md` for both static and dynamic forms
 

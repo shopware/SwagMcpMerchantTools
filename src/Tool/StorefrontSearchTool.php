@@ -26,7 +26,7 @@ use Shopware\Core\System\SalesChannel\Entity\SalesChannelRepository;
  * Searches products through the sales channel context, resolving prices,
  * customer group pricing, and visibility rules.
  */
-#[McpTool(name: 'merchant-storefront-search', description: 'Search products with storefront context. Returns prices resolved for the sales channel including customer group pricing, tax rules, and product visibility. Use the properties parameter to filter by human-readable property names (e.g. {"Color": "Red", "Size": "42"}) -- the tool resolves names to IDs automatically. Use term for full-text search. Requires a salesChannelId (see shopware://sales-channels resource); optionally pass customerId for customer-specific pricing.')]
+#[McpTool(name: 'merchant-storefront-search', description: 'Customer-facing full-text product discovery and browsing — NOT for looking up a product by its exact productNumber or field value (use shopware-entity-search for that). Returns prices resolved for the sales channel including customer group pricing, tax rules, and product visibility. Use term for full-text search. Use the properties parameter to filter by human-readable property names (e.g. {"Color": "Red", "Size": "42"}) — the tool resolves names to IDs automatically. Pass salesChannelId to select the channel (see shopware://sales-channels); optionally pass customerId for customer-specific pricing.')]
 #[McpToolRequires('sales_channel:read')]
 class StorefrontSearchTool extends McpToolResponse
 {
@@ -49,12 +49,16 @@ class StorefrontSearchTool extends McpToolResponse
     }
 
     public function __invoke(
-        string $salesChannelId,
+        string $salesChannelId = '',
         string $criteria = '{}',
         ?string $customerId = null,
         string $properties = '{}',
         string $term = '',
     ): string {
+        if ($salesChannelId === '') {
+            return $this->error('salesChannelId is required. Use the shopware://sales-channels resource to find available sales channel IDs.');
+        }
+
         $context = $this->contextProvider->getContext();
 
         if ($error = $this->requirePrivilege($context, 'sales_channel:read')) {
