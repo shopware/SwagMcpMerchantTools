@@ -8,7 +8,7 @@ use Mcp\Capability\Attribute\McpPrompt;
  * Merchant-facing context prompt. Describes merchant workflow tools and
  * complements the core `shopware-context` prompt (platform primitives).
  */
-#[McpPrompt(name: 'merchant-context', description: 'System prompt for merchant operators — covers merchant workflow tools, order management, analytics, and storefront operations.')]
+#[McpPrompt(name: 'merchant-context', title: 'Merchant Context', description: 'System prompt for merchant operators — covers merchant workflow tools, order management, analytics, and storefront operations.')]
 class MerchantContextPrompt
 {
     /**
