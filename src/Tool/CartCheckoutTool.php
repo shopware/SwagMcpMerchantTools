@@ -18,7 +18,7 @@ use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceParamete
 /**
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
  */
-#[McpTool(name: 'merchant-cart-checkout', description: 'Place an order from an existing cart. Requires a cart token (from merchant-cart-manage "create"), a salesChannelId, and a customerId (registered customer). Optionally override the payment and shipping method (use merchant-checkout-methods to list available methods). Defaults to dryRun=true for order preview.')]
+#[McpTool(name: 'merchant-cart-checkout', title: 'Cart Checkout', description: 'Place an order from an existing cart. Requires a cart token (from merchant-cart-manage "create"), a salesChannelId, and a customerId (registered customer). Optionally override the payment and shipping method (use merchant-checkout-methods to list available methods). Defaults to dryRun=true for order preview.')]
 #[McpToolDependsOn('merchant-cart-manage')]
 #[McpToolRequires('sales_channel:read')]
 #[McpToolRequires('order:create')]

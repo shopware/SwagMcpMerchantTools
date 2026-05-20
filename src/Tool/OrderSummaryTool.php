@@ -17,7 +17,7 @@ use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
 /**
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
  */
-#[McpTool(name: 'merchant-order-summary', description: 'Look up an order by order number or UUID and get a pre-formatted summary with customer info, line items, payment status, and delivery status. Provide either orderNumber (e.g. "10001") or orderId (UUID). Returns {success, data: {id, orderNumber, status, amountTotal, customer, lineItems, transactions, deliveries}}.')]
+#[McpTool(name: 'merchant-order-summary', title: 'Order Summary', description: 'Look up an order by order number or UUID and get a pre-formatted summary with customer info, line items, payment status, and delivery status. Provide either orderNumber (e.g. "10001") or orderId (UUID). Returns {success, data: {id, orderNumber, status, amountTotal, customer, lineItems, transactions, deliveries}}.')]
 #[McpToolRequires('order:read')]
 class OrderSummaryTool extends McpToolResponse
 {
