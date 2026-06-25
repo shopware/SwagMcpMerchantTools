@@ -1,4 +1,4 @@
-# SwagMcpMerchantAssistant — Agent Guide
+# SwagMcpMerchantTools — Agent Guide
 
 ## Purpose
 
@@ -38,7 +38,7 @@ Never use `shopware-` — that prefix is reserved for core.
 
 Tag services with `shopware.mcp.tool` in `src/Resources/config/services.xml`. `McpToolCompilerPass` in core handles DI wiring and MCP server registration automatically — no `scan_dirs` entry needed.
 
-The bootstrap class (`SwagMcpMerchantAssistant.php`) guards `build()` with `Feature::has('MCP_SERVER')` so no services are loaded when the feature flag is off.
+The bootstrap class (`SwagMcpMerchantTools.php`) guards `build()` with `Feature::has('MCP_SERVER')` so no services are loaded when the feature flag is off.
 
 ## Coding patterns
 

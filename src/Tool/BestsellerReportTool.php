@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Swag\McpMerchantAssistant\Tool;
+namespace Swag\McpMerchantTools\Tool;
 
 use Mcp\Capability\Attribute\McpTool;
 use Shopware\Core\Content\Product\ProductEntity;

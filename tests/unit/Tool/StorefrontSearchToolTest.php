@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Swag\McpMerchantAssistant\Tests\Unit\Tool;
+namespace Swag\McpMerchantTools\Tests\Unit\Tool;
 
 use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -22,7 +22,7 @@ use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceInterfac
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceParameters;
 use Shopware\Core\System\SalesChannel\Entity\SalesChannelRepository;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
-use Swag\McpMerchantAssistant\Tool\StorefrontSearchTool;
+use Swag\McpMerchantTools\Tool\StorefrontSearchTool;
 
 /**
  * @internal

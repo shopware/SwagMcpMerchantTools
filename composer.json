@@ -1,5 +1,5 @@
 {
-    "name": "swag/mcp-merchant-assistant",
+    "name": "swag/mcp-merchant-tools",
     "description": "Merchant-oriented MCP capability plugin for Shopware — workflow tools for orders, customers, products, storefront, and reporting",
     "version": "0.0.1",
     "type": "shopware-platform-plugin",
@@ -10,12 +10,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Swag\\McpMerchantAssistant\\": "src/"
+            "Swag\\McpMerchantTools\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Swag\\McpMerchantAssistant\\Tests\\": "tests/"
+            "Swag\\McpMerchantTools\\Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -47,10 +47,10 @@
         "ci": "Runs all CI checks"
     },
     "extra": {
-        "shopware-plugin-class": "Swag\\McpMerchantAssistant\\SwagMcpMerchantAssistant",
+        "shopware-plugin-class": "Swag\\McpMerchantTools\\SwagMcpMerchantTools",
         "label": {
-            "de-DE": "MCP Merchant Assistant",
-            "en-GB": "MCP Merchant Assistant"
+            "de-DE": "MCP Merchant Tools",
+            "en-GB": "MCP Merchant Tools"
         },
         "description": {
             "de-DE": "Merchant-orientierte MCP-Workflow-Tools für Bestellungen, Kunden, Produkte, Storefront und Reporting",

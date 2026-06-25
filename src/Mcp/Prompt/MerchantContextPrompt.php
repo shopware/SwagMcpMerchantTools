@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Swag\McpMerchantAssistant\Mcp\Prompt;
+namespace Swag\McpMerchantTools\Mcp\Prompt;
 
 use Mcp\Capability\Attribute\McpPrompt;
 

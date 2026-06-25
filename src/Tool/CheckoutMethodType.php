@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Swag\McpMerchantAssistant\Tool;
+namespace Swag\McpMerchantTools\Tool;
 
 /**
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
