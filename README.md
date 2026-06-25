@@ -2,6 +2,9 @@
 
 Merchant workflow MCP tools for Shopware. Extends the built-in MCP server with higher-level tools designed for merchant operators — order management, customer lookup, analytics, storefront search, and cart/checkout flows.
 
+> [!WARNING]
+> **Experimental. May be removed at any time.** This plugin is a proof of concept and is **not** covered by any stability or backwards-compatibility guarantee. It can be discontinued, archived, or removed without notice, particularly in favor of **Shopware Copilot**, which is the official, supported direction for AI-assisted merchant workflows. Do not rely on it for production-critical processes.
+
 ## Requirements
 
 - Shopware 6.7+
