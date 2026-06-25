@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Swag\McpMerchantAssistant\Tests\Unit\Tool;
+namespace Swag\McpMerchantTools\Tests\Unit\Tool;
 
 use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -18,15 +18,15 @@ use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
 use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceInterface;
 use Shopware\Core\System\SalesChannel\Entity\SalesChannelRepository;
-use Swag\McpMerchantAssistant\Tool\BestsellerReportTool;
-use Swag\McpMerchantAssistant\Tool\CartCheckoutTool;
-use Swag\McpMerchantAssistant\Tool\CartManageTool;
-use Swag\McpMerchantAssistant\Tool\CheckoutMethodsTool;
-use Swag\McpMerchantAssistant\Tool\CustomerLookupTool;
-use Swag\McpMerchantAssistant\Tool\OrderSummaryTool;
-use Swag\McpMerchantAssistant\Tool\ProductCreateTool;
-use Swag\McpMerchantAssistant\Tool\RevenueReportTool;
-use Swag\McpMerchantAssistant\Tool\StorefrontSearchTool;
+use Swag\McpMerchantTools\Tool\BestsellerReportTool;
+use Swag\McpMerchantTools\Tool\CartCheckoutTool;
+use Swag\McpMerchantTools\Tool\CartManageTool;
+use Swag\McpMerchantTools\Tool\CheckoutMethodsTool;
+use Swag\McpMerchantTools\Tool\CustomerLookupTool;
+use Swag\McpMerchantTools\Tool\OrderSummaryTool;
+use Swag\McpMerchantTools\Tool\ProductCreateTool;
+use Swag\McpMerchantTools\Tool\RevenueReportTool;
+use Swag\McpMerchantTools\Tool\StorefrontSearchTool;
 
 /**
  * @internal

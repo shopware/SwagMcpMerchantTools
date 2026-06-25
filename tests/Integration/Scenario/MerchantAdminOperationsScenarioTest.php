@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Swag\McpMerchantAssistant\Tests\Integration\Scenario;
+namespace Swag\McpMerchantTools\Tests\Integration\Scenario;
 
 use Shopware\Core\Framework\Uuid\Uuid;
 

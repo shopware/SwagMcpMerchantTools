@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Swag\McpMerchantAssistant\Tests\Unit\Tool;
+namespace Swag\McpMerchantTools\Tests\Unit\Tool;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
@@ -19,7 +19,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\AggregationResult\Metric
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
 use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
-use Swag\McpMerchantAssistant\Tool\RevenueReportTool;
+use Swag\McpMerchantTools\Tool\RevenueReportTool;
 
 /**
  * @internal

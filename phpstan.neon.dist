@@ -13,4 +13,9 @@ parameters:
     symfony:
         constantHassers: false
 
-    ignoreErrors: []
+    ignoreErrors:
+        # Shopware core's TestRuleHelper hardcodes the unit-test namespaces it
+        # recognizes (Shopware\Tests\Unit\, ...) and does not include plugin
+        # namespaces, so it wrongly rejects #[CoversClass] on our unit tests.
+        - identifier: shopware.unexpectedTestCovers
+          path: tests/*

@@ -1,4 +1,4 @@
-# SwagMcpMerchantAssistant
+# SwagMcpMerchantTools
 
 Merchant workflow MCP tools for Shopware. Extends the built-in MCP server with higher-level tools designed for merchant operators — order management, customer lookup, analytics, storefront search, and cart/checkout flows.
 
@@ -53,17 +53,17 @@ For platform/developer stories (entity search, schema, configuration, flow disco
 **Via Composer** (recommended):
 
 ```bash
-composer require swag/mcp-merchant-assistant
+composer require swag/mcp-merchant-tools
 bin/console plugin:refresh
-bin/console plugin:install --activate SwagMcpMerchantAssistant
+bin/console plugin:install --activate SwagMcpMerchantTools
 bin/console cache:clear
 ```
 
-**Manual** (place in `custom/plugins/SwagMcpMerchantAssistant`):
+**Manual** (place in `custom/plugins/SwagMcpMerchantTools`):
 
 ```bash
 bin/console plugin:refresh
-bin/console plugin:install --activate SwagMcpMerchantAssistant
+bin/console plugin:install --activate SwagMcpMerchantTools
 bin/console cache:clear
 ```
 
@@ -75,7 +75,7 @@ bin/console debug:mcp
 
 ## Development
 
-Run all checks from the plugin directory (`custom/plugins/SwagMcpMerchantAssistant`):
+Run all checks from the plugin directory (`custom/plugins/SwagMcpMerchantTools`):
 
 ```bash
 # All CI checks (PHPStan + CS + tests)
@@ -94,4 +94,4 @@ Core MCP architecture and tool authoring guide: see `src/Core/Framework/Mcp/AGEN
 
 ## Repository
 
-[github.com/shopware/SwagMcpMerchantAssistant](https://github.com/shopware/SwagMcpMerchantAssistant)
+[github.com/shopware/SwagMcpMerchantTools](https://github.com/shopware/SwagMcpMerchantTools)

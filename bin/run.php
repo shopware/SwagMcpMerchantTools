@@ -6,7 +6,7 @@
  *
  * Layouts supported:
  *   1. Monorepo (plugin at custom/plugins/{name}/)                  — root = shopware/platform
- *   2. Composer-installed (plugin at vendor/swag/mcp-merchant-assistant) — root = consumer project
+ *   2. Composer-installed (plugin at vendor/swag/mcp-merchant-tools) — root = consumer project
  *   3. Standalone clone with its own vendor/                        — root = the plugin itself
  *
  * Also renders phpstan.neon from phpstan.neon.dist before invoking phpstan,
@@ -93,7 +93,7 @@ function renderPhpstanConfig(string $pluginDir, string $projectRoot): void
         exit(1);
     }
 
-    $tmpDir = $projectRoot . '/var/cache/phpstan-swag-mcp-merchant-assistant';
+    $tmpDir = $projectRoot . '/var/cache/phpstan-swag-mcp-merchant-tools';
     if (!is_dir($tmpDir) && !mkdir($tmpDir, 0o775, true) && !is_dir($tmpDir)) {
         fwrite(\STDERR, \sprintf("Failed to create PHPStan tmp dir: %s\n", $tmpDir));
         exit(1);

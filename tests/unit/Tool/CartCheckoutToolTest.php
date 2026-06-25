@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Swag\McpMerchantAssistant\Tests\Unit\Tool;
+namespace Swag\McpMerchantTools\Tests\Unit\Tool;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -26,7 +26,7 @@ use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceInterface;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
-use Swag\McpMerchantAssistant\Tool\CartCheckoutTool;
+use Swag\McpMerchantTools\Tool\CartCheckoutTool;
 
 /**
  * @internal

@@ -5,41 +5,41 @@
 
     <services>
 
-        <service id="Swag\McpMerchantAssistant\Mcp\Prompt\MerchantContextPrompt">
+        <service id="Swag\McpMerchantTools\Mcp\Prompt\MerchantContextPrompt">
             <tag name="shopware.mcp.prompt"/>
         </service>
 
-        <service id="Swag\McpMerchantAssistant\Tool\OrderSummaryTool">
+        <service id="Swag\McpMerchantTools\Tool\OrderSummaryTool">
             <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry"/>
             <argument type="service" id="Shopware\Core\Framework\Mcp\Context\McpContextProvider"/>
             <tag name="shopware.mcp.tool"/>
         </service>
 
-        <service id="Swag\McpMerchantAssistant\Tool\CustomerLookupTool">
+        <service id="Swag\McpMerchantTools\Tool\CustomerLookupTool">
             <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry"/>
             <argument type="service" id="Shopware\Core\Framework\Mcp\Context\McpContextProvider"/>
             <tag name="shopware.mcp.tool"/>
         </service>
 
-        <service id="Swag\McpMerchantAssistant\Tool\ProductCreateTool">
+        <service id="Swag\McpMerchantTools\Tool\ProductCreateTool">
             <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry"/>
             <argument type="service" id="Shopware\Core\Framework\Mcp\Context\McpContextProvider"/>
             <tag name="shopware.mcp.tool"/>
         </service>
 
-        <service id="Swag\McpMerchantAssistant\Tool\RevenueReportTool">
+        <service id="Swag\McpMerchantTools\Tool\RevenueReportTool">
             <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry"/>
             <argument type="service" id="Shopware\Core\Framework\Mcp\Context\McpContextProvider"/>
             <tag name="shopware.mcp.tool"/>
         </service>
 
-        <service id="Swag\McpMerchantAssistant\Tool\BestsellerReportTool">
+        <service id="Swag\McpMerchantTools\Tool\BestsellerReportTool">
             <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry"/>
             <argument type="service" id="Shopware\Core\Framework\Mcp\Context\McpContextProvider"/>
             <tag name="shopware.mcp.tool"/>
         </service>
 
-        <service id="Swag\McpMerchantAssistant\Tool\StorefrontSearchTool">
+        <service id="Swag\McpMerchantTools\Tool\StorefrontSearchTool">
             <argument type="service" id="Shopware\Core\System\SalesChannel\Context\SalesChannelContextService"/>
             <argument type="service" id="sales_channel.product.repository"/>
             <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry"/>
@@ -50,14 +50,14 @@
             <tag name="shopware.mcp.tool"/>
         </service>
 
-        <service id="Swag\McpMerchantAssistant\Tool\CartManageTool">
+        <service id="Swag\McpMerchantTools\Tool\CartManageTool">
             <argument type="service" id="Shopware\Core\System\SalesChannel\Context\SalesChannelContextService"/>
             <argument type="service" id="Shopware\Core\Checkout\Cart\SalesChannel\CartService"/>
             <argument type="service" id="Shopware\Core\Framework\Mcp\Context\McpContextProvider"/>
             <tag name="shopware.mcp.tool"/>
         </service>
 
-        <service id="Swag\McpMerchantAssistant\Tool\CartCheckoutTool">
+        <service id="Swag\McpMerchantTools\Tool\CartCheckoutTool">
             <argument type="service" id="Shopware\Core\System\SalesChannel\Context\SalesChannelContextService"/>
             <argument type="service" id="Shopware\Core\Checkout\Cart\SalesChannel\CartService"/>
             <argument type="service" id="Shopware\Core\Framework\Mcp\Context\McpContextProvider"/>
@@ -65,7 +65,7 @@
             <tag name="shopware.mcp.tool"/>
         </service>
 
-        <service id="Swag\McpMerchantAssistant\Tool\CheckoutMethodsTool">
+        <service id="Swag\McpMerchantTools\Tool\CheckoutMethodsTool">
             <argument type="service" id="Shopware\Core\System\SalesChannel\Context\SalesChannelContextService"/>
             <argument type="service" id="Shopware\Core\Checkout\Payment\SalesChannel\PaymentMethodRoute"/>
             <argument type="service" id="Shopware\Core\Checkout\Shipping\SalesChannel\ShippingMethodRoute"/>
