@@ -8,6 +8,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\Mcp\Attribute\McpToolDependsOn;
+use Shopware\Core\Framework\Mcp\Attribute\McpToolGroup;
 use Shopware\Core\Framework\Mcp\Attribute\McpToolRequires;
 use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
 use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
@@ -20,6 +21,7 @@ use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceParamete
  */
 #[McpTool(name: 'merchant-cart-checkout', title: 'Cart Checkout', description: 'Place an order from an existing cart. Requires a cart token (from merchant-cart-manage "create"), a salesChannelId, and a customerId (registered customer). Optionally override the payment and shipping method (use merchant-checkout-methods to list available methods). Defaults to dryRun=true for order preview.')]
 #[McpToolDependsOn('merchant-cart-manage')]
+#[McpToolGroup('merchant-sales')]
 #[McpToolRequires('sales_channel:read')]
 #[McpToolRequires('order:create')]
 class CartCheckoutTool extends McpToolResponse

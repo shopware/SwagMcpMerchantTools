@@ -8,6 +8,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsAnyFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Shopware\Core\Framework\Mcp\Attribute\McpToolGroup;
 use Shopware\Core\Framework\Mcp\Attribute\McpToolRequires;
 use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
 use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
@@ -17,6 +18,7 @@ use Shopware\Core\Framework\Uuid\Uuid;
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
  */
 #[McpTool(name: 'merchant-product-create', title: 'Product Create', description: 'Create a product with human-readable inputs. Automatically resolves tax rate to tax ID, currency ISO code to currency ID, exact category names to category IDs, and builds the nested price structure. Defaults to dryRun=true. Returns the generated payload in dryRun mode, or the created product ID on commit.')]
+#[McpToolGroup('merchant-catalog')]
 #[McpToolRequires('product:create')]
 #[McpToolRequires('product:read')]
 #[McpToolRequires('tax:read')]
