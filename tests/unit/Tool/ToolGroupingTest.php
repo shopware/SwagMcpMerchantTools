@@ -25,7 +25,7 @@ final class ToolGroupingTest extends TestCase
      * @param class-string $toolClass
      */
     #[DataProvider('toolProvider')]
-    public function testToolGroup(string $toolClass, string $expectedGroup, bool $expectedVisible): void
+    public function testToolGroup(string $toolClass, string $expectedGroup): void
     {
         $reflection = new \ReflectionClass($toolClass);
 
@@ -35,10 +35,14 @@ final class ToolGroupingTest extends TestCase
     }
 
     /**
+     * Core derives the advertised (non-deferred) surface from the `discovery`
+     * tool group, so every tool in this plugin is deferred and none may
+     * resurrect the retired per-tool meta[deferred] flag.
+     *
      * @param class-string $toolClass
      */
     #[DataProvider('toolProvider')]
-    public function testToolDeferral(string $toolClass, string $expectedGroup, bool $expectedVisible): void
+    public function testToolIsDeferred(string $toolClass, string $expectedGroup): void
     {
         $reflection = new \ReflectionClass($toolClass);
 
@@ -47,34 +51,32 @@ final class ToolGroupingTest extends TestCase
 
         $meta = $toolAttributes[0]->newInstance()->meta;
 
-        if ($expectedVisible) {
-            static::assertIsArray($meta, \sprintf('%s must declare meta to stay visible.', $toolClass));
-            static::assertFalse($meta['deferred'], \sprintf('%s must have meta[deferred] === false.', $toolClass));
-
-            return;
-        }
-
-        static::assertTrue(
-            $meta === null || ($meta['deferred'] ?? true) === true,
-            \sprintf('%s must be deferred by default (no meta[deferred] === false).', $toolClass)
+        static::assertArrayNotHasKey(
+            'deferred',
+            $meta ?? [],
+            \sprintf(
+                '%s must not use the retired meta[deferred] flag; deferral follows the "%s" toolset group.',
+                $toolClass,
+                $expectedGroup
+            )
         );
     }
 
     /**
-     * @return array<string, array{class-string, string, bool}>
+     * @return array<string, array{class-string, string}>
      */
     public static function toolProvider(): array
     {
         return [
-            'OrderSummaryTool' => [OrderSummaryTool::class, 'merchant-analytics', false],
-            'CustomerLookupTool' => [CustomerLookupTool::class, 'merchant-analytics', false],
-            'RevenueReportTool' => [RevenueReportTool::class, 'merchant-analytics', false],
-            'BestsellerReportTool' => [BestsellerReportTool::class, 'merchant-analytics', false],
-            'StorefrontSearchTool' => [StorefrontSearchTool::class, 'merchant-sales', true],
-            'CheckoutMethodsTool' => [CheckoutMethodsTool::class, 'merchant-sales', false],
-            'CartManageTool' => [CartManageTool::class, 'merchant-sales', false],
-            'CartCheckoutTool' => [CartCheckoutTool::class, 'merchant-sales', false],
-            'ProductCreateTool' => [ProductCreateTool::class, 'merchant-catalog', false],
+            'OrderSummaryTool' => [OrderSummaryTool::class, 'merchant-analytics'],
+            'CustomerLookupTool' => [CustomerLookupTool::class, 'merchant-analytics'],
+            'RevenueReportTool' => [RevenueReportTool::class, 'merchant-analytics'],
+            'BestsellerReportTool' => [BestsellerReportTool::class, 'merchant-analytics'],
+            'StorefrontSearchTool' => [StorefrontSearchTool::class, 'merchant-sales'],
+            'CheckoutMethodsTool' => [CheckoutMethodsTool::class, 'merchant-sales'],
+            'CartManageTool' => [CartManageTool::class, 'merchant-sales'],
+            'CartCheckoutTool' => [CartCheckoutTool::class, 'merchant-sales'],
+            'ProductCreateTool' => [ProductCreateTool::class, 'merchant-catalog'],
         ];
     }
 }
