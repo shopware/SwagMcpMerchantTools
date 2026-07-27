@@ -163,7 +163,7 @@ class BestsellerReportTool extends McpToolResponse
         $result = $productRepository->search($criteria, $context);
 
         $map = [];
-        foreach ($result->getElements() as $product) {
+        foreach ($result->getEntities()->getElements() as $product) {
             \assert($product instanceof ProductEntity);
             $map[$product->getId()] = $product;
         }

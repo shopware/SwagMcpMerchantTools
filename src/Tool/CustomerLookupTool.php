@@ -66,7 +66,7 @@ class CustomerLookupTool extends McpToolResponse
 
         $result = $repository->search($criteria, $context);
 
-        $customer = $result->first();
+        $customer = $result->getEntities()->first();
 
         if (!$customer instanceof CustomerEntity) {
             return $this->error('Customer not found.');

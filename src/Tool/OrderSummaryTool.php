@@ -64,7 +64,7 @@ class OrderSummaryTool extends McpToolResponse
 
         $result = $repository->search($criteria, $context);
 
-        $order = $result->first();
+        $order = $result->getEntities()->first();
 
         if (!$order instanceof OrderEntity) {
             return $this->error('Order not found.');
