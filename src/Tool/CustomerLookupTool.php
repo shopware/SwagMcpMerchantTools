@@ -8,6 +8,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\FieldSorting;
+use Shopware\Core\Framework\Mcp\Attribute\McpToolGroup;
 use Shopware\Core\Framework\Mcp\Attribute\McpToolRequires;
 use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
 use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
@@ -16,6 +17,7 @@ use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
  */
 #[McpTool(name: 'merchant-customer-lookup', title: 'Customer Lookup', description: 'Look up a customer by email, customer number, or UUID and get profile with order history. Provide at least one identifier. Returns {success, data: {id, email, customerNumber, firstName, lastName, group, orderCount, orderTotalAmount, recentOrders: [...]}}.')]
+#[McpToolGroup('merchant-analytics')]
 #[McpToolRequires('customer:read')]
 class CustomerLookupTool extends McpToolResponse
 {
@@ -64,7 +66,7 @@ class CustomerLookupTool extends McpToolResponse
 
         $result = $repository->search($criteria, $context);
 
-        $customer = $result->first();
+        $customer = $result->getEntities()->first();
 
         if (!$customer instanceof CustomerEntity) {
             return $this->error('Customer not found.');

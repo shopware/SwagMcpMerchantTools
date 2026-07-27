@@ -15,6 +15,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\MultiFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\NotFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\RangeFilter;
+use Shopware\Core\Framework\Mcp\Attribute\McpToolGroup;
 use Shopware\Core\Framework\Mcp\Attribute\McpToolRequires;
 use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
 use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
@@ -23,6 +24,7 @@ use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
  */
 #[McpTool(name: 'merchant-bestseller-report', title: 'Bestseller Report', description: 'Get the top-selling products by quantity in a date range. Excludes cancelled orders. Returns product name, number, total quantity sold, order count, and total revenue. Provide ISO 8601 dates (e.g. "2025-01-01"). Returns {success, data: {period, bestsellers: [{productId, productNumber, name, totalQuantity, orderCount, totalRevenue}]}}.')]
+#[McpToolGroup('merchant-analytics')]
 #[McpToolRequires('order:read')]
 #[McpToolRequires('product:read')]
 class BestsellerReportTool extends McpToolResponse
@@ -161,7 +163,7 @@ class BestsellerReportTool extends McpToolResponse
         $result = $productRepository->search($criteria, $context);
 
         $map = [];
-        foreach ($result->getElements() as $product) {
+        foreach ($result->getEntities()->getElements() as $product) {
             \assert($product instanceof ProductEntity);
             $map[$product->getId()] = $product;
         }
