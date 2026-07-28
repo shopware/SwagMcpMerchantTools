@@ -23,7 +23,7 @@ use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
 /**
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
  */
-#[McpTool(name: 'merchant-bestseller-report', title: 'Bestseller Report', description: 'Get the top-selling products by quantity in a date range. Excludes cancelled orders. Returns product name, number, total quantity sold, order count, and total revenue. Provide ISO 8601 dates (e.g. "2025-01-01"). Returns {success, data: {period, bestsellers: [{productId, productNumber, name, totalQuantity, orderCount, totalRevenue}]}}.')]
+#[McpTool(name: 'merchant-bestseller-report', title: 'Bestseller Report', description: 'Ranks individual products by units sold in a date range — best sellers, top performers, which products shifted the most units. Excludes cancelled orders. Provide ISO 8601 dates (e.g. "2025-01-01"). Per-product ranking only, not shop-wide money totals over time — merchant-revenue-report does that. Returns {success, data: {period, bestsellers: [{productId, productNumber, name, totalQuantity, orderCount, totalRevenue}]}}.')]
 #[McpToolGroup('merchant-analytics')]
 #[McpToolRequires('order:read')]
 #[McpToolRequires('product:read')]
