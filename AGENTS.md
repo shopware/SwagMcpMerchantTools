@@ -51,9 +51,21 @@ The bootstrap class (`SwagMcpMerchantTools.php`) guards `build()` with `Feature:
 - Declare tool prerequisites with `#[McpToolDependsOn('merchant-tool-name')]` when one tool only works after another has been called (e.g., `merchant-cart-checkout` depends on `merchant-cart-manage`)
 - Declare required ACL privileges with `#[McpToolRequires('entity:operation')]` (repeatable) — this is informational only and helps operators configure roles correctly. Still call `$this->requirePrivilege($context, ...)` inside `__invoke()` for actual runtime enforcement. See `src/Core/Framework/Mcp/Tool/AGENTS.md` for both static and dynamic forms
 
+## Description quality
+
+The `description` on `#[McpTool]` is what the LLM reads to pick a tool. It is a routing surface, not a docblock. The general rules live in [`src/Core/Framework/Mcp/Tool/AGENTS.md`](../../src/Core/Framework/Mcp/Tool/AGENTS.md) under "Description quality (LLM routing)". Read those first. Three things are specific to this plugin, because every merchant tool sits next to a core tool that does something similar:
+
+- **Every tool states what it is NOT for and names the sibling that handles that case.** Without the contrast the model picks the merchant tool for adjacent work: `merchant-order-summary` was chosen for "List the last 10 orders" until it said "Single order only: shopware-entity-search handles multi-order queries". `ToolDescriptionTest` pins the required sibling per tool and doubles as documentation of the intended routing graph.
+- **Keep sibling references conditional, never imperative.** "use `merchant-checkout-methods` to list available methods" makes the model call that sibling as its first action, even when the user's prompt already supplied everything. Use the shape from core `EntitySearchTool`: "if you don't already know the method IDs, `merchant-checkout-methods` will tell you". Real prerequisites go in `#[McpToolDependsOn]`, which the allowlist UI and `debug:mcp` already understand.
+- **A cross-toolset boundary must not reuse the sibling's trigger vocabulary.** All merchant tools are deferred, so the model reaches them through `shopware-tool-search`, and `ToolSearch::scoreTool()` ranks by plain `str_contains` on the lowercased description (+0.6 per token hit, +0.8 per unique match). A boundary phrased "for listing multiple orders use shopware-entity-search" substring-matches `list` and pulls the tool back into the results for the very prompt it must lose. "multi-order queries" carries the same meaning and scores nothing for `orders`. Same-toolset siblings are exempt: they are advertised together after one `shopware-toolset-enable`, so retrieval cannot separate them and only the description can.
+
+Behaviour is graded end to end by [shopware-mcp-evals](https://github.com/shopware/shopware-mcp-evals), which scores the first non-meta tool call against an expected tool. Run it after any description change. Remember `bin/console cache:clear` first: descriptions are baked into the compiled DI container, so both `debug:mcp` and the eval keep scoring the old text until the cache is rebuilt.
+
 ## Tests
 
 Unit tests live in `tests/unit/Tool/`. Mock DAL services and `McpContextProvider`. Do not use integration test infrastructure — unit tests only.
+
+`ToolDescriptionTest` and `ToolGroupingTest` are attribute-level guards rather than behaviour tests: they assert the routing rules above and the group/deferral invariants, so a description or grouping regression fails locally instead of only showing up as a lower eval pass rate.
 
 ## Security layers
 
