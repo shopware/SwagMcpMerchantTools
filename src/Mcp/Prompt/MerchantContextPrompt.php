@@ -26,7 +26,7 @@ Load the `shopware-context` prompt for core platform primitives (entity CRUD, sc
 
 ## Discovering merchant tools (toolsets and search)
 
-Merchant tools are deferred and do NOT appear in the default `tools/list` — no merchant tool is advertised up front. Surface them in one of two ways:
+The merchant tools are deferred and do NOT appear in the default `tools/list`. Surface them in one of two ways:
 
 - Call `shopware-tool-search` with a natural-language query (e.g. "create a product", "revenue this month") to find and inspect matching tools, including deferred ones, then call the tool by name.
 - Or call `shopware-toolset-enable` with a toolset name to add its whole group to `tools/list` for the current session. Use `shopware-toolsets-list` to see what is available.

@@ -35,15 +35,14 @@ final class ToolGroupingTest extends TestCase
     }
 
     /**
-     * Visibility derives entirely from the group: only core's `discovery` group
-     * is advertised, so every merchant tool is deferred and reachable through
-     * shopware-tool-search or shopware-toolset-enable. No tool may re-open the
-     * default surface by declaring a visibility hint of its own.
+     * Core derives the advertised (non-deferred) surface from the `discovery`
+     * tool group, so every tool in this plugin is deferred and none may
+     * resurrect the retired per-tool meta[deferred] flag.
      *
      * @param class-string $toolClass
      */
-    #[DataProvider('toolClassProvider')]
-    public function testToolDeclaresNoVisibilityMeta(string $toolClass): void
+    #[DataProvider('toolProvider')]
+    public function testToolIsDeferred(string $toolClass, string $expectedGroup): void
     {
         $reflection = new \ReflectionClass($toolClass);
 
@@ -52,18 +51,15 @@ final class ToolGroupingTest extends TestCase
 
         $meta = $toolAttributes[0]->newInstance()->meta;
 
-        static::assertTrue(
-            $meta === null || !\array_key_exists('deferred', $meta),
-            \sprintf('%s must not declare meta[deferred]; deferral follows from McpToolGroup.', $toolClass)
+        static::assertArrayNotHasKey(
+            'deferred',
+            $meta ?? [],
+            \sprintf(
+                '%s must not use the retired meta[deferred] flag; deferral follows the "%s" toolset group.',
+                $toolClass,
+                $expectedGroup
+            )
         );
-    }
-
-    /**
-     * @return array<string, array{class-string}>
-     */
-    public static function toolClassProvider(): array
-    {
-        return array_map(static fn (array $row): array => [$row[0]], self::toolProvider());
     }
 
     /**
