@@ -16,7 +16,7 @@ use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
 /**
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
  */
-#[McpTool(name: 'merchant-customer-lookup', title: 'Customer Lookup', description: 'Look up a customer by email, customer number, or UUID and get profile with order history. Provide at least one identifier. Returns {success, data: {id, email, customerNumber, firstName, lastName, group, orderCount, orderTotalAmount, recentOrders: [...]}}.')]
+#[McpTool(name: 'merchant-customer-lookup', title: 'Customer Lookup', description: 'Pull up one customer account by email, customer number, or UUID — profile plus order history and lifetime order total. Provide at least one identifier. Single customer only: shopware-entity-search handles requests that span more than one customer. Returns {success, data: {id, email, customerNumber, firstName, lastName, group, orderCount, orderTotalAmount, recentOrders: [...]}}.')]
 #[McpToolGroup('merchant-analytics')]
 #[McpToolRequires('customer:read')]
 class CustomerLookupTool extends McpToolResponse

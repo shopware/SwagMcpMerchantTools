@@ -17,7 +17,7 @@ use Shopware\Core\Framework\Uuid\Uuid;
 /**
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
  */
-#[McpTool(name: 'merchant-product-create', title: 'Product Create', description: 'Create a product with human-readable inputs. Automatically resolves tax rate to tax ID, currency ISO code to currency ID, exact category names to category IDs, and builds the nested price structure. Defaults to dryRun=true. Returns the generated payload in dryRun mode, or the created product ID on commit.')]
+#[McpTool(name: 'merchant-product-create', title: 'Product Create', description: 'The right tool for adding a brand-new product, article, or item to the catalog. Give it plain values (name, product number, price, tax rate) — it resolves tax rate to tax ID, currency ISO code to currency ID, exact category names to category IDs, and builds the nested price structure. New products only; for a product that is already in the catalog, shopware-entity-upsert is the raw fallback. Defaults to dryRun=true. Returns the generated payload in dryRun mode, or the created product ID on commit.')]
 #[McpToolGroup('merchant-catalog')]
 #[McpToolRequires('product:create')]
 #[McpToolRequires('product:read')]

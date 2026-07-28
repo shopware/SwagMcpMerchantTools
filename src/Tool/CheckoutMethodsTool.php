@@ -20,7 +20,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
  */
-#[McpTool(name: 'merchant-checkout-methods', title: 'Checkout Methods', description: 'List available payment and shipping methods for a sales channel. Use type "payment" for payment methods only, "shipping" for shipping methods only, or "all" for both. Returns method IDs needed for merchant-cart-checkout.')]
+#[McpTool(name: 'merchant-checkout-methods', title: 'Checkout Methods', description: 'Which payment methods and delivery options a sales channel offers at checkout — including whether customers can pay by a specific method. Use type "payment" for payment methods only, "shipping" for shipping methods only, or "all" for both. Read-only: it returns method names and IDs, it never places an order — merchant-cart-checkout does that.')]
 #[McpToolGroup('merchant-sales')]
 #[McpToolRequires('sales_channel:read')]
 class CheckoutMethodsTool extends McpToolResponse

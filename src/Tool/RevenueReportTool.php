@@ -25,7 +25,7 @@ use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
 /**
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
  */
-#[McpTool(name: 'merchant-revenue-report', title: 'Revenue Report', description: 'Generate a revenue report for a date range. Provide ISO 8601 dates (e.g. "2025-01-01"). Excludes cancelled orders. Optional groupBy: day (default), week, month. Use page/limit to paginate the timeline buckets. Returns {success, data: {period, totalRevenue, orderCount, averageOrderValue, timeline: [{date, revenue}]}, _meta: {page, limit, total}}.')]
+#[McpTool(name: 'merchant-revenue-report', title: 'Revenue Report', description: 'Money totals over a date range — revenue, turnover, total sales, average order value, period-over-period comparison. Provide ISO 8601 dates (e.g. "2025-01-01"). Excludes cancelled orders. Optional groupBy: day (default), week, month. Use page/limit to paginate the timeline buckets. Never a per-product ranking — merchant-bestseller-report does that. Returns {success, data: {period, totalRevenue, orderCount, averageOrderValue, timeline: [{date, revenue}]}, _meta: {page, limit, total}}.')]
 #[McpToolGroup('merchant-analytics')]
 #[McpToolRequires('order:read')]
 class RevenueReportTool extends McpToolResponse
