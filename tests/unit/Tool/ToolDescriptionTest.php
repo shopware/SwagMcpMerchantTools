@@ -71,6 +71,45 @@ final class ToolDescriptionTest extends TestCase
     }
 
     /**
+     * A boundary has to name the sibling, but it must not borrow the words a
+     * user would type when they want that sibling. ToolSearch scores tools with
+     * str_contains() over the lowercased description, so "the raw fallback for
+     * editing existing records" makes this tool match "edit an existing
+     * product" -- the exact request the boundary exists to hand away. Naming the
+     * sibling is required; importing its verbs is the defect, so referenced tool
+     * names are stripped before the check.
+     *
+     * Only cross-toolset pairs are listed. Same-toolset siblings (the two report
+     * tools, cart-manage and cart-checkout) are advertised together, so the
+     * model reads both descriptions side by side and the contrasting verbs are
+     * what disambiguate them.
+     *
+     * @param class-string $toolClass
+     * @param list<string> $forbidden
+     */
+    #[DataProvider('siblingVocabularyProvider')]
+    public function testBoundaryDoesNotBorrowSiblingTriggerVocabulary(string $toolClass, array $forbidden): void
+    {
+        $withoutToolNames = preg_replace('/(merchant|shopware)-[a-z-]+/', '', mb_strtolower(self::description($toolClass)));
+        static::assertIsString($withoutToolNames);
+
+        foreach ($forbidden as $trigger) {
+            static::assertStringNotContainsString(
+                $trigger,
+                $withoutToolNames,
+                \sprintf(
+                    '%s description contains "%s", which is vocabulary a user types when they want the sibling '
+                    . 'tool this boundary hands the case to. ToolSearch matches by substring, so the boundary '
+                    . 'pulls the tool into results for the request it means to exclude. Rephrase without the '
+                    . 'sibling trigger words and keep the sibling name.',
+                    $toolClass,
+                    $trigger
+                )
+            );
+        }
+    }
+
+    /**
      * @param class-string $toolClass
      * @param list<string> $expectedSiblings
      */
@@ -154,6 +193,28 @@ final class ToolDescriptionTest extends TestCase
             'CartManageTool' => [CartManageTool::class],
             'CartCheckoutTool' => [CartCheckoutTool::class],
             'ProductCreateTool' => [ProductCreateTool::class],
+        ];
+    }
+
+    /**
+     * Per tool, the sibling's trigger words that must not appear in its
+     * description. Kept to verbs and qualifiers: the tool's own subject nouns
+     * ("product", "order", "customer") legitimately appear and are not the
+     * problem.
+     *
+     * @return array<string, array{class-string, list<string>}>
+     */
+    public static function siblingVocabularyProvider(): array
+    {
+        return [
+            // shopware-entity-upsert: "edit an existing product", "update the price", "rename it"
+            'ProductCreateTool' => [ProductCreateTool::class, ['edit', 'updat', 'modif', 'rename', 'existing']],
+            // shopware-entity-search: "filter customers by segment", "list all customers"
+            'CustomerLookupTool' => [CustomerLookupTool::class, ['filter', 'segment', 'list ']],
+            // shopware-entity-search + shopware-order-state: "list all orders", "cancel it",
+            // "move it into the shipped state". "state" is unavoidable inside the sibling's own
+            // name, which is why names are stripped before this runs.
+            'OrderSummaryTool' => [OrderSummaryTool::class, ['list ', 'cancel', 'move', 'transition', 'refund']],
         ];
     }
 
