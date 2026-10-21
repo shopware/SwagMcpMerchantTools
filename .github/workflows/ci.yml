@@ -88,7 +88,9 @@ jobs:
       - name: Assert merchant MCP tools and prompt are registered
         run: |
           set -euo pipefail
-          output=$(symfony console debug:mcp)
+          # debug:mcp lists tools only; prompts and resources moved to
+          # debug:mcp:native.
+          output=$(symfony console debug:mcp; symfony console debug:mcp:native)
           echo "$output"
           missing=()
           while IFS= read -r name; do

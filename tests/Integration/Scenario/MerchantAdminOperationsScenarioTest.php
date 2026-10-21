@@ -23,8 +23,9 @@ class MerchantAdminOperationsScenarioTest extends MerchantScenarioTestCase
 
         static::assertTrue($data['_meta']['dryRun']);
         static::assertSame('MCP Test Shirt', $data['data']['name']);
-        static::assertNotEmpty($data['data']['taxId']);
-        static::assertNotEmpty($data['data']['price']);
+        static::assertIsString($data['data']['taxId']);
+        static::assertNotSame('', $data['data']['taxId']);
+        static::assertNotCount(0, $data['data']['price']);
         static::assertEqualsWithDelta(29.99 / 1.19, $data['data']['price'][0]['net'], 0.01);
     }
 
@@ -44,7 +45,8 @@ class MerchantAdminOperationsScenarioTest extends MerchantScenarioTestCase
         $data = $this->decodeToolOutput($output);
 
         static::assertFalse($data['_meta']['dryRun']);
-        static::assertNotEmpty($data['data']['productId']);
+        static::assertIsString($data['data']['productId']);
+        static::assertNotSame('', $data['data']['productId']);
 
         $readOutput = ($this->entityReadTool)('product', $data['data']['productId']);
         $readData = $this->decodeToolOutput($readOutput);

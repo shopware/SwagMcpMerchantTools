@@ -47,7 +47,8 @@ class CartManageToolTest extends TestCase
 
         $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
         static::assertTrue($data['success']);
-        static::assertNotEmpty($data['data']['token']);
+        static::assertIsString($data['data']['token']);
+        static::assertNotSame('', $data['data']['token']);
         static::assertSame([], $data['data']['lineItems']);
         static::assertEqualsWithDelta(0.0, $data['data']['totalPrice'], 0.001);
         static::assertSame(0, $data['data']['itemCount']);
@@ -60,7 +61,7 @@ class CartManageToolTest extends TestCase
 
         $cart = $this->createCartWithItems([
             ['id' => $productId, 'label' => 'Blue T-Shirt', 'quantity' => 2, 'unitPrice' => 29.99, 'totalPrice' => 59.98],
-        ], 59.98, 50.40, 9.58);
+        ], 59.98, 50.40);
 
         $this->cartService->method('getCart')->willReturn($cart);
         $this->cartService->method('add')->willReturn($cart);
@@ -87,7 +88,7 @@ class CartManageToolTest extends TestCase
     {
         $tool = $this->createTool();
 
-        $cart = $this->createCartWithItems([], 0.0, 0.0, 0.0);
+        $cart = $this->createCartWithItems([], 0.0, 0.0);
         $this->cartService->method('getCart')->willReturn($cart);
         $this->cartService->method('remove')->willReturn($cart);
 
@@ -110,7 +111,7 @@ class CartManageToolTest extends TestCase
 
         $cart = $this->createCartWithItems([
             ['id' => $productId, 'label' => 'Blue T-Shirt', 'quantity' => 5, 'unitPrice' => 29.99, 'totalPrice' => 149.95],
-        ], 149.95, 126.01, 23.94);
+        ], 149.95, 126.01);
 
         $this->cartService->method('getCart')->willReturn($cart);
         $this->cartService->method('changeQuantity')->willReturn($cart);
@@ -132,7 +133,7 @@ class CartManageToolTest extends TestCase
     {
         $tool = $this->createTool();
 
-        $cart = $this->createCartWithItems([], 0.0, 0.0, 0.0);
+        $cart = $this->createCartWithItems([], 0.0, 0.0);
         $this->cartService->method('getCart')->willReturn($cart);
 
         $output = ($tool)(
@@ -279,7 +280,7 @@ class CartManageToolTest extends TestCase
     /**
      * @param list<array{id: string, label: string, quantity: int, unitPrice: float, totalPrice: float}> $items
      */
-    private function createCartWithItems(array $items, float $totalPrice, float $netPrice, float $taxAmount): Cart
+    private function createCartWithItems(array $items, float $totalPrice, float $netPrice): Cart
     {
         $lineItems = [];
         foreach ($items as $item) {
