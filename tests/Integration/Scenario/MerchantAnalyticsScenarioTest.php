@@ -71,7 +71,7 @@ class MerchantAnalyticsScenarioTest extends MerchantScenarioTestCase
         static::assertGreaterThanOrEqual(3, $data['data']['orderCount']);
         static::assertGreaterThan(0, $data['data']['averageOrderValue']);
         static::assertIsArray($data['data']['timeline']);
-        static::assertNotEmpty($data['data']['timeline']);
+        static::assertNotCount(0, $data['data']['timeline']);
 
         $firstBucket = $data['data']['timeline'][0];
         static::assertArrayHasKey('date', $firstBucket);
@@ -172,7 +172,7 @@ class MerchantAnalyticsScenarioTest extends MerchantScenarioTestCase
 
         $data = $this->decodeToolOutput($output);
 
-        static::assertNotEmpty($data['data']['bestsellers']);
+        static::assertNotCount(0, $data['data']['bestsellers']);
         static::assertSame(['from' => '2025-02-01', 'to' => '2025-02-28'], $data['data']['period']);
 
         $productAEntry = null;

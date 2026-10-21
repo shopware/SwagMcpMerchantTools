@@ -55,7 +55,7 @@ class ProductCreateTool extends McpToolResponse
         $taxId = $this->resolveTaxId($taxRate, $context);
 
         if ($taxId === null) {
-            return $this->error(\sprintf('No tax found with rate %.2f%%. Create the tax first or use a different rate.', $taxRate));
+            return $this->error(\sprintf('No tax found with rate %.2F%%. Create the tax first or use a different rate.', $taxRate));
         }
 
         $currencyId = $this->resolveCurrencyId($currencyCode, $context);

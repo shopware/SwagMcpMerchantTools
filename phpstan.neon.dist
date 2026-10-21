@@ -19,12 +19,3 @@ parameters:
         # namespaces, so it wrongly rejects #[CoversClass] on our unit tests.
         - identifier: shopware.unexpectedTestCovers
           path: tests/*
-        # Core deprecated EntitySearchResult::__construct() for a v6.8 signature
-        # change (the $entity parameter goes away and the rest reorder). The new
-        # signature does not exist yet, so there is nothing to migrate to — the
-        # test fixtures must keep calling the current constructor. Scoped to
-        # tests because src never constructs DAL search results.
-        # TODO: drop this once we target 6.8.0 and the fixtures use the new
-        # signature (the pattern then becomes unmatched and PHPStan reports it).
-        - identifier: method.deprecated
-          path: tests/*

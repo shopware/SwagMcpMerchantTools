@@ -85,9 +85,9 @@ class MerchantAdminDataScenarioTest extends MerchantScenarioTestCase
         static::assertNotNull($data['data']['status']);
         static::assertIsFloat($data['data']['amountTotal']);
         static::assertSame('mcp-us1@example.com', $data['data']['customer']['email']);
-        static::assertNotEmpty($data['data']['lineItems']);
+        static::assertNotCount(0, $data['data']['lineItems']);
         static::assertSame('Test Product', $data['data']['lineItems'][0]['label']);
-        static::assertNotEmpty($data['data']['transactions']);
-        static::assertNotEmpty($data['data']['deliveries']);
+        static::assertNotCount(0, $data['data']['transactions']);
+        static::assertNotCount(0, $data['data']['deliveries']);
     }
 }

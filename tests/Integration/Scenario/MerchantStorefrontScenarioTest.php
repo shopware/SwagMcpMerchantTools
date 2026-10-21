@@ -87,7 +87,8 @@ class MerchantStorefrontScenarioTest extends MerchantScenarioTestCase
         );
 
         $createData = $this->decodeToolOutput($createOutput);
-        static::assertNotEmpty($createData['data']['token']);
+        static::assertIsString($createData['data']['token']);
+        static::assertNotSame('', $createData['data']['token']);
         static::assertSame(0, $createData['data']['itemCount']);
 
         $token = $createData['data']['token'];
@@ -153,10 +154,12 @@ class MerchantStorefrontScenarioTest extends MerchantScenarioTestCase
 
         $dryRunData = $this->decodeToolOutput($dryRunOutput);
         static::assertTrue($dryRunData['_meta']['dryRun']);
-        static::assertNotEmpty($dryRunData['data']['lineItems']);
+        static::assertNotCount(0, $dryRunData['data']['lineItems']);
         static::assertGreaterThan(0, $dryRunData['data']['totalPrice']);
-        static::assertNotEmpty($dryRunData['data']['paymentMethodId']);
-        static::assertNotEmpty($dryRunData['data']['shippingMethodId']);
+        static::assertIsString($dryRunData['data']['paymentMethodId']);
+        static::assertNotSame('', $dryRunData['data']['paymentMethodId']);
+        static::assertIsString($dryRunData['data']['shippingMethodId']);
+        static::assertNotSame('', $dryRunData['data']['shippingMethodId']);
 
         $commitOutput = ($this->cartCheckoutTool)(
             salesChannelId: TestDefaults::SALES_CHANNEL,
@@ -167,7 +170,8 @@ class MerchantStorefrontScenarioTest extends MerchantScenarioTestCase
 
         $commitData = $this->decodeToolOutput($commitOutput);
         static::assertFalse($commitData['_meta']['dryRun']);
-        static::assertNotEmpty($commitData['data']['orderId']);
+        static::assertIsString($commitData['data']['orderId']);
+        static::assertNotSame('', $commitData['data']['orderId']);
     }
 
     public function testUS12CheckoutMethods(): void
@@ -179,8 +183,8 @@ class MerchantStorefrontScenarioTest extends MerchantScenarioTestCase
 
         $data = $this->decodeToolOutput($output);
 
-        static::assertNotEmpty($data['data']['paymentMethods']);
-        static::assertNotEmpty($data['data']['shippingMethods']);
+        static::assertNotCount(0, $data['data']['paymentMethods']);
+        static::assertNotCount(0, $data['data']['shippingMethods']);
 
         $firstPayment = $data['data']['paymentMethods'][0];
         static::assertArrayHasKey('id', $firstPayment);
@@ -214,7 +218,8 @@ class MerchantStorefrontScenarioTest extends MerchantScenarioTestCase
         static::assertSame($email, $data['data']['email']);
         static::assertSame('Jane', $data['data']['firstName']);
         static::assertSame('Doe', $data['data']['lastName']);
-        static::assertNotEmpty($data['data']['customerNumber']);
+        static::assertIsString($data['data']['customerNumber']);
+        static::assertNotSame('', $data['data']['customerNumber']);
         static::assertIsArray($data['data']['recentOrders']);
     }
 }

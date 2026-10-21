@@ -81,7 +81,7 @@ class OrderSummaryToolTest extends TestCase
         $repository = $this->createMock(EntityRepository::class);
         $repository->method('search')->willReturnCallback(function (Criteria $criteria, Context $context) use ($order, $orderId): EntitySearchResult {
             static::assertSame([$orderId], $criteria->getIds());
-            static::assertEmpty($criteria->getFilters(), 'orderNumber filter must not be applied when orderId is set');
+            static::assertSame([], $criteria->getFilters(), 'orderNumber filter must not be applied when orderId is set');
 
             $collection = new OrderCollection([$order]);
 
