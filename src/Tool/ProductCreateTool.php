@@ -11,8 +11,10 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\Mcp\Attribute\McpToolGroup;
 use Shopware\Core\Framework\Mcp\Attribute\McpToolRequires;
 use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
+use Shopware\Core\Framework\Mcp\Result\McpToolResult;
 use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
 use Shopware\Core\Framework\Uuid\Uuid;
+use Swag\McpMerchantTools\Mcp\Tool\McpToolResultHelpers;
 
 /**
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
@@ -25,6 +27,8 @@ use Shopware\Core\Framework\Uuid\Uuid;
 #[McpToolRequires('currency:read')]
 class ProductCreateTool extends McpToolResponse
 {
+    use McpToolResultHelpers;
+
     /**
      * @internal
      */
@@ -45,23 +49,23 @@ class ProductCreateTool extends McpToolResponse
         string $categories = '',
         bool $active = true,
         bool $dryRun = true,
-    ): string {
+    ): McpToolResult {
         $context = $this->contextProvider->getContext();
 
-        if ($error = $this->requirePrivilege($context, 'product:create', 'product:read', 'tax:read', 'currency:read')) {
+        if ($error = $this->missingPrivilegeResult($context, 'product:create', 'product:read', 'tax:read', 'currency:read')) {
             return $error;
         }
 
         $taxId = $this->resolveTaxId($taxRate, $context);
 
         if ($taxId === null) {
-            return $this->error(\sprintf('No tax found with rate %.2F%%. Create the tax first or use a different rate.', $taxRate));
+            return McpToolResult::failure(\sprintf('No tax found with rate %.2F%%. Create the tax first or use a different rate.', $taxRate));
         }
 
         $currencyId = $this->resolveCurrencyId($currencyCode, $context);
 
         if ($currencyId === null) {
-            return $this->error(\sprintf('No currency found with ISO code "%s".', $currencyCode));
+            return McpToolResult::failure(\sprintf('No currency found with ISO code "%s".', $currencyCode));
         }
 
         $netPrice = round($grossPrice / (1 + $taxRate / 100), 4);
@@ -89,7 +93,7 @@ class ProductCreateTool extends McpToolResponse
             $categoryResult = $this->resolveCategoryIds($categories, $context);
 
             if (\is_string($categoryResult)) {
-                return $this->error($categoryResult);
+                return McpToolResult::failure($categoryResult);
             }
 
             if ($categoryResult !== []) {
@@ -102,10 +106,10 @@ class ProductCreateTool extends McpToolResponse
             $duplicateCriteria->addFilter(new EqualsFilter('productNumber', $productNumber));
             $duplicateCriteria->setLimit(1);
             if ($this->registry->getRepository('product')->searchIds($duplicateCriteria, $context)->firstId() !== null) {
-                return $this->error(\sprintf('A product with productNumber "%s" already exists. Choose a different number or use dryRun=false to overwrite via upsert.', $productNumber));
+                return McpToolResult::failure(\sprintf('A product with productNumber "%s" already exists. Choose a different number or use dryRun=false to overwrite via upsert.', $productNumber));
             }
 
-            return $this->success($payload, ['dryRun' => true]);
+            return McpToolResult::success($payload, ['dryRun' => true]);
         }
 
         $repository = $this->registry->getRepository('product');
@@ -113,10 +117,10 @@ class ProductCreateTool extends McpToolResponse
         try {
             $repository->upsert([$payload], $context);
         } catch (\Throwable $e) {
-            return $this->error($e->getMessage());
+            return McpToolResult::failure($e->getMessage());
         }
 
-        return $this->success(['productId' => $payload['id'], 'productNumber' => $productNumber], ['dryRun' => false]);
+        return McpToolResult::success(['productId' => $payload['id'], 'productNumber' => $productNumber], ['dryRun' => false]);
     }
 
     private function resolveTaxId(float $taxRate, Context $context): ?string

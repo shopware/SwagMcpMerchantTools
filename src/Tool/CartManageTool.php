@@ -9,10 +9,12 @@ use Shopware\Core\Checkout\Cart\SalesChannel\CartService;
 use Shopware\Core\Framework\Mcp\Attribute\McpToolGroup;
 use Shopware\Core\Framework\Mcp\Attribute\McpToolRequires;
 use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
+use Shopware\Core\Framework\Mcp\Result\McpToolResult;
 use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
 use Shopware\Core\Framework\Util\Random;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceInterface;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceParameters;
+use Swag\McpMerchantTools\Mcp\Tool\McpToolResultHelpers;
 
 /**
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
@@ -22,6 +24,8 @@ use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceParamete
 #[McpToolRequires('sales_channel:read')]
 class CartManageTool extends McpToolResponse
 {
+    use McpToolResultHelpers;
+
     /**
      * @internal
      */
@@ -40,20 +44,20 @@ class CartManageTool extends McpToolResponse
         int $quantity = 1,
         string $lineItemId = '',
         ?string $customerId = null,
-    ): string {
+    ): McpToolResult {
         $context = $this->contextProvider->getContext();
 
-        if ($error = $this->requirePrivilege($context, 'sales_channel:read')) {
+        if ($error = $this->missingPrivilegeResult($context, 'sales_channel:read')) {
             return $error;
         }
 
         $cartAction = CartAction::tryFrom($action);
         if ($cartAction === null) {
-            return $this->error(\sprintf('Invalid action "%s". Must be one of: %s', $action, implode(', ', array_column(CartAction::cases(), 'value'))));
+            return McpToolResult::failure(\sprintf('Invalid action "%s". Must be one of: %s', $action, implode(', ', array_column(CartAction::cases(), 'value'))));
         }
 
         if ($cartAction !== CartAction::Create && $token === '') {
-            return $this->error('Token is required for action "' . $action . '". Use action "create" first to get a token.');
+            return McpToolResult::failure('Token is required for action "' . $action . '". Use action "create" first to get a token.');
         }
 
         try {
@@ -65,11 +69,11 @@ class CartManageTool extends McpToolResponse
                 CartAction::Get => $this->handleGet($salesChannelId, $token, $customerId),
             };
         } catch (\Throwable $e) {
-            return $this->error($e->getMessage());
+            return McpToolResult::failure($e->getMessage());
         }
     }
 
-    private function handleCreate(string $salesChannelId, ?string $customerId): string
+    private function handleCreate(string $salesChannelId, ?string $customerId): McpToolResult
     {
         $token = Random::getAlphanumericString(32);
 
@@ -81,7 +85,7 @@ class CartManageTool extends McpToolResponse
 
         $this->cartService->createNew($token);
 
-        return $this->success([
+        return McpToolResult::success([
             'token' => $token,
             'lineItems' => [],
             'totalPrice' => 0.0,
@@ -89,10 +93,10 @@ class CartManageTool extends McpToolResponse
         ]);
     }
 
-    private function handleAdd(string $salesChannelId, string $token, string $productId, int $quantity, ?string $customerId): string
+    private function handleAdd(string $salesChannelId, string $token, string $productId, int $quantity, ?string $customerId): McpToolResult
     {
         if ($productId === '') {
-            return $this->error('productId is required for action "add".');
+            return McpToolResult::failure('productId is required for action "add".');
         }
 
         $context = $this->contextService->get(new SalesChannelContextServiceParameters(
@@ -108,10 +112,10 @@ class CartManageTool extends McpToolResponse
         return $this->formatCart($cart, $token);
     }
 
-    private function handleRemove(string $salesChannelId, string $token, string $lineItemId, ?string $customerId): string
+    private function handleRemove(string $salesChannelId, string $token, string $lineItemId, ?string $customerId): McpToolResult
     {
         if ($lineItemId === '') {
-            return $this->error('lineItemId is required for action "remove".');
+            return McpToolResult::failure('lineItemId is required for action "remove".');
         }
 
         $context = $this->contextService->get(new SalesChannelContextServiceParameters(
@@ -126,10 +130,10 @@ class CartManageTool extends McpToolResponse
         return $this->formatCart($cart, $token);
     }
 
-    private function handleUpdate(string $salesChannelId, string $token, string $lineItemId, int $quantity, ?string $customerId): string
+    private function handleUpdate(string $salesChannelId, string $token, string $lineItemId, int $quantity, ?string $customerId): McpToolResult
     {
         if ($lineItemId === '') {
-            return $this->error('lineItemId is required for action "update".');
+            return McpToolResult::failure('lineItemId is required for action "update".');
         }
 
         $context = $this->contextService->get(new SalesChannelContextServiceParameters(
@@ -144,7 +148,7 @@ class CartManageTool extends McpToolResponse
         return $this->formatCart($cart, $token);
     }
 
-    private function handleGet(string $salesChannelId, string $token, ?string $customerId): string
+    private function handleGet(string $salesChannelId, string $token, ?string $customerId): McpToolResult
     {
         $context = $this->contextService->get(new SalesChannelContextServiceParameters(
             salesChannelId: $salesChannelId,
@@ -157,7 +161,7 @@ class CartManageTool extends McpToolResponse
         return $this->formatCart($cart, $token);
     }
 
-    private function formatCart(Cart $cart, string $token): string
+    private function formatCart(Cart $cart, string $token): McpToolResult
     {
         $lineItems = [];
         foreach ($cart->getLineItems()->getElements() as $item) {
@@ -172,7 +176,7 @@ class CartManageTool extends McpToolResponse
             ];
         }
 
-        return $this->success([
+        return McpToolResult::success([
             'token' => $token,
             'lineItems' => $lineItems,
             'totalPrice' => $cart->getPrice()->getTotalPrice(),

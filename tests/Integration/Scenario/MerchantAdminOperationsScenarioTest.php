@@ -19,14 +19,14 @@ class MerchantAdminOperationsScenarioTest extends MerchantScenarioTestCase
             dryRun: true,
         );
 
-        $data = $this->decodeToolOutput($output);
+        $data = $this->assertToolSucceeded($output);
 
-        static::assertTrue($data['_meta']['dryRun']);
-        static::assertSame('MCP Test Shirt', $data['data']['name']);
-        static::assertIsString($data['data']['taxId']);
-        static::assertNotSame('', $data['data']['taxId']);
-        static::assertNotCount(0, $data['data']['price']);
-        static::assertEqualsWithDelta(29.99 / 1.19, $data['data']['price'][0]['net'], 0.01);
+        static::assertTrue($data->meta['dryRun']);
+        static::assertSame('MCP Test Shirt', $data->data['name']);
+        static::assertIsString($data->data['taxId']);
+        static::assertNotSame('', $data->data['taxId']);
+        static::assertNotCount(0, $data->data['price']);
+        static::assertEqualsWithDelta(29.99 / 1.19, $data->data['price'][0]['net'], 0.01);
     }
 
     public function testUS4ProductCreateCommit(): void
@@ -42,16 +42,16 @@ class MerchantAdminOperationsScenarioTest extends MerchantScenarioTestCase
             dryRun: false,
         );
 
-        $data = $this->decodeToolOutput($output);
+        $data = $this->assertToolSucceeded($output);
 
-        static::assertFalse($data['_meta']['dryRun']);
-        static::assertIsString($data['data']['productId']);
-        static::assertNotSame('', $data['data']['productId']);
+        static::assertFalse($data->meta['dryRun']);
+        static::assertIsString($data->data['productId']);
+        static::assertNotSame('', $data->data['productId']);
 
-        $readOutput = ($this->entityReadTool)('product', $data['data']['productId']);
-        $readData = $this->decodeToolOutput($readOutput);
+        $readOutput = ($this->entityReadTool)('product', $data->data['productId']);
+        $readData = $this->assertToolSucceeded($readOutput);
 
-        static::assertSame('MCP Commit Shirt', $readData['data']['name']);
-        static::assertSame(50, $readData['data']['stock']);
+        static::assertSame('MCP Commit Shirt', $readData->data['name']);
+        static::assertSame(50, $readData->data['stock']);
     }
 }

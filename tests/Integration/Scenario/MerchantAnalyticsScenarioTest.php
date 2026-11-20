@@ -65,15 +65,15 @@ class MerchantAnalyticsScenarioTest extends MerchantScenarioTestCase
             groupBy: 'day',
         );
 
-        $data = $this->decodeToolOutput($output);
+        $data = $this->assertToolSucceeded($output);
 
-        static::assertGreaterThanOrEqual($expectedTotal, $data['data']['totalRevenue']);
-        static::assertGreaterThanOrEqual(3, $data['data']['orderCount']);
-        static::assertGreaterThan(0, $data['data']['averageOrderValue']);
-        static::assertIsArray($data['data']['timeline']);
-        static::assertNotCount(0, $data['data']['timeline']);
+        static::assertGreaterThanOrEqual($expectedTotal, $data->data['totalRevenue']);
+        static::assertGreaterThanOrEqual(3, $data->data['orderCount']);
+        static::assertGreaterThan(0, $data->data['averageOrderValue']);
+        static::assertIsArray($data->data['timeline']);
+        static::assertNotCount(0, $data->data['timeline']);
 
-        $firstBucket = $data['data']['timeline'][0];
+        $firstBucket = $data->data['timeline'][0];
         static::assertArrayHasKey('date', $firstBucket);
         static::assertArrayHasKey('revenue', $firstBucket);
     }
@@ -170,14 +170,14 @@ class MerchantAnalyticsScenarioTest extends MerchantScenarioTestCase
             limit: 10,
         );
 
-        $data = $this->decodeToolOutput($output);
+        $data = $this->assertToolSucceeded($output);
 
-        static::assertNotCount(0, $data['data']['bestsellers']);
-        static::assertSame(['from' => '2025-02-01', 'to' => '2025-02-28'], $data['data']['period']);
+        static::assertNotCount(0, $data->data['bestsellers']);
+        static::assertSame(['from' => '2025-02-01', 'to' => '2025-02-28'], $data->data['period']);
 
         $productAEntry = null;
         $productBEntry = null;
-        foreach ($data['data']['bestsellers'] as $entry) {
+        foreach ($data->data['bestsellers'] as $entry) {
             if ($entry['productId'] === $productAId) {
                 $productAEntry = $entry;
             }
@@ -192,8 +192,8 @@ class MerchantAnalyticsScenarioTest extends MerchantScenarioTestCase
         static::assertGreaterThanOrEqual(8, $productAEntry['totalQuantity']);
         static::assertGreaterThanOrEqual(2, $productBEntry['totalQuantity']);
 
-        $productAIndex = array_search($productAId, array_column($data['data']['bestsellers'], 'productId'), true);
-        $productBIndex = array_search($productBId, array_column($data['data']['bestsellers'], 'productId'), true);
+        $productAIndex = array_search($productAId, array_column($data->data['bestsellers'], 'productId'), true);
+        $productBIndex = array_search($productBId, array_column($data->data['bestsellers'], 'productId'), true);
         static::assertLessThan($productBIndex, $productAIndex, 'Product A should rank higher than Product B');
     }
 }

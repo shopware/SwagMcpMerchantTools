@@ -47,9 +47,9 @@ class MerchantStorefrontScenarioTest extends MerchantScenarioTestCase
             properties: json_encode(['Color' => 'Red', 'Size' => '42'], \JSON_THROW_ON_ERROR),
         );
 
-        $data = $this->decodeToolOutput($output);
+        $data = $this->assertToolSucceeded($output);
 
-        $foundIds = array_column($data['data'], 'id');
+        $foundIds = array_column($data->data, 'id');
         static::assertContains($ids->get('red-shoe-42'), $foundIds, 'Product with matching properties should be found');
         static::assertNotContains($ids->get('blue-shoe-38'), $foundIds, 'Product with non-matching properties should not be found');
     }
@@ -61,9 +61,8 @@ class MerchantStorefrontScenarioTest extends MerchantScenarioTestCase
             properties: json_encode(['NonExistentGroup' => 'SomeValue'], \JSON_THROW_ON_ERROR),
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('Could not resolve properties', $data['error']);
+        $error = $this->assertToolFailed($output);
+        static::assertStringContainsString('Could not resolve properties', $error->message);
     }
 
     public function testUS11CartCreateAndAddProduct(): void
@@ -86,12 +85,12 @@ class MerchantStorefrontScenarioTest extends MerchantScenarioTestCase
             action: 'create',
         );
 
-        $createData = $this->decodeToolOutput($createOutput);
-        static::assertIsString($createData['data']['token']);
-        static::assertNotSame('', $createData['data']['token']);
-        static::assertSame(0, $createData['data']['itemCount']);
+        $createData = $this->assertToolSucceeded($createOutput);
+        static::assertIsString($createData->data['token']);
+        static::assertNotSame('', $createData->data['token']);
+        static::assertSame(0, $createData->data['itemCount']);
 
-        $token = $createData['data']['token'];
+        $token = $createData->data['token'];
 
         $addOutput = ($this->cartManageTool)(
             salesChannelId: TestDefaults::SALES_CHANNEL,
@@ -101,9 +100,9 @@ class MerchantStorefrontScenarioTest extends MerchantScenarioTestCase
             quantity: 2,
         );
 
-        $addData = $this->decodeToolOutput($addOutput);
-        static::assertGreaterThanOrEqual(1, $addData['data']['itemCount']);
-        static::assertGreaterThan(0, $addData['data']['totalPrice']);
+        $addData = $this->assertToolSucceeded($addOutput);
+        static::assertGreaterThanOrEqual(1, $addData->data['itemCount']);
+        static::assertGreaterThan(0, $addData->data['totalPrice']);
     }
 
     public function testUS11CartCheckoutDryRunAndCommit(): void
@@ -135,7 +134,7 @@ class MerchantStorefrontScenarioTest extends MerchantScenarioTestCase
             salesChannelId: TestDefaults::SALES_CHANNEL,
             action: 'create',
         );
-        $token = $this->decodeToolOutput($createOutput)['data']['token'];
+        $token = $this->assertToolSucceeded($createOutput)->data['token'];
 
         ($this->cartManageTool)(
             salesChannelId: TestDefaults::SALES_CHANNEL,
@@ -152,14 +151,14 @@ class MerchantStorefrontScenarioTest extends MerchantScenarioTestCase
             dryRun: true,
         );
 
-        $dryRunData = $this->decodeToolOutput($dryRunOutput);
-        static::assertTrue($dryRunData['_meta']['dryRun']);
-        static::assertNotCount(0, $dryRunData['data']['lineItems']);
-        static::assertGreaterThan(0, $dryRunData['data']['totalPrice']);
-        static::assertIsString($dryRunData['data']['paymentMethodId']);
-        static::assertNotSame('', $dryRunData['data']['paymentMethodId']);
-        static::assertIsString($dryRunData['data']['shippingMethodId']);
-        static::assertNotSame('', $dryRunData['data']['shippingMethodId']);
+        $dryRunData = $this->assertToolSucceeded($dryRunOutput);
+        static::assertTrue($dryRunData->meta['dryRun']);
+        static::assertNotCount(0, $dryRunData->data['lineItems']);
+        static::assertGreaterThan(0, $dryRunData->data['totalPrice']);
+        static::assertIsString($dryRunData->data['paymentMethodId']);
+        static::assertNotSame('', $dryRunData->data['paymentMethodId']);
+        static::assertIsString($dryRunData->data['shippingMethodId']);
+        static::assertNotSame('', $dryRunData->data['shippingMethodId']);
 
         $commitOutput = ($this->cartCheckoutTool)(
             salesChannelId: TestDefaults::SALES_CHANNEL,
@@ -168,10 +167,10 @@ class MerchantStorefrontScenarioTest extends MerchantScenarioTestCase
             dryRun: false,
         );
 
-        $commitData = $this->decodeToolOutput($commitOutput);
-        static::assertFalse($commitData['_meta']['dryRun']);
-        static::assertIsString($commitData['data']['orderId']);
-        static::assertNotSame('', $commitData['data']['orderId']);
+        $commitData = $this->assertToolSucceeded($commitOutput);
+        static::assertFalse($commitData->meta['dryRun']);
+        static::assertIsString($commitData->data['orderId']);
+        static::assertNotSame('', $commitData->data['orderId']);
     }
 
     public function testUS12CheckoutMethods(): void
@@ -181,16 +180,16 @@ class MerchantStorefrontScenarioTest extends MerchantScenarioTestCase
             type: 'all',
         );
 
-        $data = $this->decodeToolOutput($output);
+        $data = $this->assertToolSucceeded($output);
 
-        static::assertNotCount(0, $data['data']['paymentMethods']);
-        static::assertNotCount(0, $data['data']['shippingMethods']);
+        static::assertNotCount(0, $data->data['paymentMethods']);
+        static::assertNotCount(0, $data->data['shippingMethods']);
 
-        $firstPayment = $data['data']['paymentMethods'][0];
+        $firstPayment = $data->data['paymentMethods'][0];
         static::assertArrayHasKey('id', $firstPayment);
         static::assertArrayHasKey('name', $firstPayment);
 
-        $firstShipping = $data['data']['shippingMethods'][0];
+        $firstShipping = $data->data['shippingMethods'][0];
         static::assertArrayHasKey('id', $firstShipping);
         static::assertArrayHasKey('name', $firstShipping);
     }
@@ -213,13 +212,13 @@ class MerchantStorefrontScenarioTest extends MerchantScenarioTestCase
         $customerRepository->create([$customer], $context);
 
         $output = ($this->customerLookupTool)(email: $email);
-        $data = $this->decodeToolOutput($output);
+        $data = $this->assertToolSucceeded($output);
 
-        static::assertSame($email, $data['data']['email']);
-        static::assertSame('Jane', $data['data']['firstName']);
-        static::assertSame('Doe', $data['data']['lastName']);
-        static::assertIsString($data['data']['customerNumber']);
-        static::assertNotSame('', $data['data']['customerNumber']);
-        static::assertIsArray($data['data']['recentOrders']);
+        static::assertSame($email, $data->data['email']);
+        static::assertSame('Jane', $data->data['firstName']);
+        static::assertSame('Doe', $data->data['lastName']);
+        static::assertIsString($data->data['customerNumber']);
+        static::assertNotSame('', $data->data['customerNumber']);
+        static::assertIsArray($data->data['recentOrders']);
     }
 }

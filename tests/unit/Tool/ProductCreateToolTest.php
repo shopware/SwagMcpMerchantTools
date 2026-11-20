@@ -15,6 +15,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\IdSearchResult;
 use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
+use Shopware\Core\Framework\Mcp\Result\McpToolError;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Swag\McpMerchantTools\Tool\ProductCreateTool;
 
@@ -40,20 +41,18 @@ class ProductCreateToolTest extends TestCase
             stock: 50,
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertTrue($data['success']);
-        static::assertTrue($data['_meta']['dryRun']);
-        static::assertSame('Test Product', $data['data']['name']);
-        static::assertSame('SW-TEST-001', $data['data']['productNumber']);
-        static::assertSame(50, $data['data']['stock']);
-        static::assertTrue($data['data']['active']);
-        static::assertSame($taxId, $data['data']['taxId']);
-        static::assertCount(1, $data['data']['price']);
-        static::assertSame($currencyId, $data['data']['price'][0]['currencyId']);
-        static::assertEqualsWithDelta(119.0, $data['data']['price'][0]['gross'], 0.01);
-        static::assertEqualsWithDelta(100.0, $data['data']['price'][0]['net'], 0.01);
-        static::assertTrue($data['data']['price'][0]['linked']);
+        static::assertFalse($output->isError());
+        static::assertTrue($output->meta['dryRun']);
+        static::assertSame('Test Product', $output->data['name']);
+        static::assertSame('SW-TEST-001', $output->data['productNumber']);
+        static::assertSame(50, $output->data['stock']);
+        static::assertTrue($output->data['active']);
+        static::assertSame($taxId, $output->data['taxId']);
+        static::assertCount(1, $output->data['price']);
+        static::assertSame($currencyId, $output->data['price'][0]['currencyId']);
+        static::assertEqualsWithDelta(119.0, $output->data['price'][0]['gross'], 0.01);
+        static::assertEqualsWithDelta(100.0, $output->data['price'][0]['net'], 0.01);
+        static::assertTrue($output->data['price'][0]['linked']);
     }
 
     #[TestDox('includes description in payload when provided')]
@@ -67,10 +66,8 @@ class ProductCreateToolTest extends TestCase
             description: '<p>A nice product</p>',
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertTrue($data['success']);
-        static::assertSame('<p>A nice product</p>', $data['data']['description']);
+        static::assertFalse($output->isError());
+        static::assertSame('<p>A nice product</p>', $output->data['description']);
     }
 
     #[TestDox('resolves category names to IDs in dry-run payload')]
@@ -85,11 +82,9 @@ class ProductCreateToolTest extends TestCase
             categories: 'Shoes',
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertTrue($data['success']);
-        static::assertCount(1, $data['data']['categories']);
-        static::assertSame($catId, $data['data']['categories'][0]['id']);
+        static::assertFalse($output->isError());
+        static::assertCount(1, $output->data['categories']);
+        static::assertSame($catId, $output->data['categories'][0]['id']);
     }
 
     #[TestDox('skips empty category names from trailing commas')]
@@ -104,10 +99,8 @@ class ProductCreateToolTest extends TestCase
             categories: 'Shoes,',
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertTrue($data['success']);
-        static::assertCount(1, $data['data']['categories']);
+        static::assertFalse($output->isError());
+        static::assertCount(1, $output->data['categories']);
     }
 
     #[TestDox('returns error when category names cannot be resolved')]
@@ -121,10 +114,9 @@ class ProductCreateToolTest extends TestCase
             categories: 'Nonexistent',
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('Nonexistent', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('Nonexistent', $output->error->message);
     }
 
     #[TestDox('commits product and returns product ID when dryRun is false')]
@@ -140,12 +132,10 @@ class ProductCreateToolTest extends TestCase
             dryRun: false,
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertTrue($data['success']);
-        static::assertFalse($data['_meta']['dryRun']);
-        static::assertArrayHasKey('productId', $data['data']);
-        static::assertSame('SW-TEST-008', $data['data']['productNumber']);
+        static::assertFalse($output->isError());
+        static::assertFalse($output->meta['dryRun']);
+        static::assertArrayHasKey('productId', $output->data);
+        static::assertSame('SW-TEST-008', $output->data['productNumber']);
     }
 
     #[TestDox('returns error when upsert throws on commit')]
@@ -162,10 +152,9 @@ class ProductCreateToolTest extends TestCase
             dryRun: false,
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('DB write failed', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('DB write failed', $output->error->message);
     }
 
     #[TestDox('returns error when tax rate is not found')]
@@ -179,10 +168,9 @@ class ProductCreateToolTest extends TestCase
             taxRate: 7,
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('7.00%', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('7.00%', $output->error->message);
     }
 
     #[TestDox('returns error when currency ISO code is not found')]
@@ -196,10 +184,9 @@ class ProductCreateToolTest extends TestCase
             currencyCode: 'USD',
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('USD', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('USD', $output->error->message);
     }
 
     #[TestDox('returns error when ACL privileges are missing')]
@@ -219,10 +206,10 @@ class ProductCreateToolTest extends TestCase
             grossPrice: 29.99,
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('Missing privilege', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('Missing privilege', $output->error->message);
+        static::assertSame(McpToolError::MISSING_PRIVILEGE, $output->error->code);
     }
 
     /**

@@ -15,6 +15,8 @@ use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\RequestCriteriaBuilder;
 use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
+use Shopware\Core\Framework\Mcp\Result\McpToolError;
+use Shopware\Core\Framework\Mcp\Result\McpToolResult;
 use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceInterface;
 use Shopware\Core\System\SalesChannel\Entity\SalesChannelRepository;
@@ -146,11 +148,12 @@ class AclEnforcementTest extends TestCase
         return $provider;
     }
 
-    private function assertAclDenied(string $output, string $expectedPrivilege): void
+    private function assertAclDenied(McpToolResult $output, string $expectedPrivilege): void
     {
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('Missing privilege', $data['error']);
-        static::assertStringContainsString($expectedPrivilege, $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('Missing privilege', $output->error->message);
+        static::assertSame(McpToolError::MISSING_PRIVILEGE, $output->error->code);
+        static::assertStringContainsString($expectedPrivilege, $output->error->message);
     }
 }

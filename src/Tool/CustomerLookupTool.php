@@ -11,7 +11,9 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\FieldSorting;
 use Shopware\Core\Framework\Mcp\Attribute\McpToolGroup;
 use Shopware\Core\Framework\Mcp\Attribute\McpToolRequires;
 use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
+use Shopware\Core\Framework\Mcp\Result\McpToolResult;
 use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
+use Swag\McpMerchantTools\Mcp\Tool\McpToolResultHelpers;
 
 /**
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
@@ -21,6 +23,8 @@ use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
 #[McpToolRequires('customer:read')]
 class CustomerLookupTool extends McpToolResponse
 {
+    use McpToolResultHelpers;
+
     /**
      * @internal
      */
@@ -30,15 +34,15 @@ class CustomerLookupTool extends McpToolResponse
     ) {
     }
 
-    public function __invoke(string $email = '', string $customerNumber = '', string $customerId = ''): string
+    public function __invoke(string $email = '', string $customerNumber = '', string $customerId = ''): McpToolResult
     {
         if ($email === '' && $customerNumber === '' && $customerId === '') {
-            return $this->error('Provide at least one of: email, customerNumber, or customerId.');
+            return McpToolResult::failure('Provide at least one of: email, customerNumber, or customerId.');
         }
 
         $context = $this->contextProvider->getContext();
 
-        if ($error = $this->requirePrivilege($context, 'customer:read')) {
+        if ($error = $this->missingPrivilegeResult($context, 'customer:read')) {
             return $error;
         }
 
@@ -69,7 +73,7 @@ class CustomerLookupTool extends McpToolResponse
         $customer = $result->getEntities()->first();
 
         if (!$customer instanceof CustomerEntity) {
-            return $this->error('Customer not found.');
+            return McpToolResult::failure('Customer not found.');
         }
 
         $recentOrders = [];
@@ -88,7 +92,7 @@ class CustomerLookupTool extends McpToolResponse
             ];
         }
 
-        return $this->success([
+        return McpToolResult::success([
             'id' => $customer->getId(),
             'email' => $customer->getEmail(),
             'customerNumber' => $customer->getCustomerNumber(),
