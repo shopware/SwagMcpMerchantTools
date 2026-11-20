@@ -11,10 +11,12 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Mcp\Attribute\McpToolGroup;
 use Shopware\Core\Framework\Mcp\Attribute\McpToolRequires;
 use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
+use Shopware\Core\Framework\Mcp\Result\McpToolResult;
 use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
 use Shopware\Core\Framework\Util\Random;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceInterface;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceParameters;
+use Swag\McpMerchantTools\Mcp\Tool\McpToolResultHelpers;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -25,6 +27,8 @@ use Symfony\Component\HttpFoundation\Request;
 #[McpToolRequires('sales_channel:read')]
 class CheckoutMethodsTool extends McpToolResponse
 {
+    use McpToolResultHelpers;
+
     /**
      * @internal
      */
@@ -39,16 +43,16 @@ class CheckoutMethodsTool extends McpToolResponse
     public function __invoke(
         string $salesChannelId,
         string $type = 'all',
-    ): string {
+    ): McpToolResult {
         $context = $this->contextProvider->getContext();
 
-        if ($error = $this->requirePrivilege($context, 'sales_channel:read')) {
+        if ($error = $this->missingPrivilegeResult($context, 'sales_channel:read')) {
             return $error;
         }
 
         $methodType = CheckoutMethodType::tryFrom($type);
         if ($methodType === null) {
-            return $this->error(\sprintf('Invalid type "%s". Must be one of: %s', $type, implode(', ', array_column(CheckoutMethodType::cases(), 'value'))));
+            return McpToolResult::failure(\sprintf('Invalid type "%s". Must be one of: %s', $type, implode(', ', array_column(CheckoutMethodType::cases(), 'value'))));
         }
 
         try {
@@ -87,9 +91,9 @@ class CheckoutMethodsTool extends McpToolResponse
                 ));
             }
 
-            return $this->success($result);
+            return McpToolResult::success($result);
         } catch (\Throwable $e) {
-            return $this->error($e->getMessage());
+            return McpToolResult::failure($e->getMessage());
         }
     }
 }

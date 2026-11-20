@@ -36,18 +36,16 @@ class CustomerLookupToolTest extends TestCase
         $tool = $this->createTool($customer);
         $output = ($tool)(email: 'john@example.com');
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertTrue($data['success']);
-        static::assertSame($customerId, $data['data']['id']);
-        static::assertSame('john@example.com', $data['data']['email']);
-        static::assertSame('SW10001', $data['data']['customerNumber']);
-        static::assertSame('John', $data['data']['firstName']);
-        static::assertSame('Doe', $data['data']['lastName']);
-        static::assertSame('Standard', $data['data']['group']);
-        static::assertSame(3, $data['data']['orderCount']);
-        static::assertCount(1, $data['data']['recentOrders']);
-        static::assertSame('10001', $data['data']['recentOrders'][0]['orderNumber']);
+        static::assertFalse($output->isError());
+        static::assertSame($customerId, $output->data['id']);
+        static::assertSame('john@example.com', $output->data['email']);
+        static::assertSame('SW10001', $output->data['customerNumber']);
+        static::assertSame('John', $output->data['firstName']);
+        static::assertSame('Doe', $output->data['lastName']);
+        static::assertSame('Standard', $output->data['group']);
+        static::assertSame(3, $output->data['orderCount']);
+        static::assertCount(1, $output->data['recentOrders']);
+        static::assertSame('10001', $output->data['recentOrders'][0]['orderNumber']);
     }
 
     public function testLookupByCustomerNumber(): void
@@ -58,10 +56,8 @@ class CustomerLookupToolTest extends TestCase
         $tool = $this->createTool($customer);
         $output = ($tool)(customerNumber: 'SW10001');
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertTrue($data['success']);
-        static::assertSame($customerId, $data['data']['id']);
+        static::assertFalse($output->isError());
+        static::assertSame($customerId, $output->data['id']);
     }
 
     public function testLookupByCustomerId(): void
@@ -72,10 +68,8 @@ class CustomerLookupToolTest extends TestCase
         $tool = $this->createTool($customer);
         $output = ($tool)(customerId: $customerId);
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertTrue($data['success']);
-        static::assertSame($customerId, $data['data']['id']);
+        static::assertFalse($output->isError());
+        static::assertSame($customerId, $output->data['id']);
     }
 
     public function testNotFoundReturnsError(): void
@@ -83,10 +77,9 @@ class CustomerLookupToolTest extends TestCase
         $tool = $this->createTool(null);
         $output = ($tool)(email: 'unknown@example.com');
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertFalse($data['success']);
-        static::assertSame('Customer not found.', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertSame('Customer not found.', $output->error->message);
     }
 
     public function testNoIdentifierReturnsError(): void
@@ -94,10 +87,9 @@ class CustomerLookupToolTest extends TestCase
         $tool = $this->createTool(null);
         $output = ($tool)();
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('email, customerNumber, or customerId', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('email, customerNumber, or customerId', $output->error->message);
     }
 
     public function testOrderCustomerWithNullOrderIsSkipped(): void
@@ -114,10 +106,8 @@ class CustomerLookupToolTest extends TestCase
         $tool = $this->createTool($customer);
         $output = ($tool)(email: 'john@example.com');
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertTrue($data['success']);
-        static::assertCount(1, $data['data']['recentOrders']);
+        static::assertFalse($output->isError());
+        static::assertCount(1, $output->data['recentOrders']);
     }
 
     public function testDeniesAccessWithoutPermission(): void
@@ -135,10 +125,9 @@ class CustomerLookupToolTest extends TestCase
         $tool = new CustomerLookupTool($registry, $contextProvider);
         $output = ($tool)(email: 'john@example.com');
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('customer:read', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('customer:read', $output->error->message);
     }
 
     private function createTool(?CustomerEntity $customer): CustomerLookupTool

@@ -79,15 +79,15 @@ class MerchantAdminDataScenarioTest extends MerchantScenarioTestCase
         $orderRepository->upsert([$order], Context::createDefaultContext());
 
         $output = ($this->orderSummaryTool)(orderNumber: $orderNumber);
-        $data = $this->decodeToolOutput($output);
+        $data = $this->assertToolSucceeded($output);
 
-        static::assertSame($orderNumber, $data['data']['orderNumber']);
-        static::assertNotNull($data['data']['status']);
-        static::assertIsFloat($data['data']['amountTotal']);
-        static::assertSame('mcp-us1@example.com', $data['data']['customer']['email']);
-        static::assertNotCount(0, $data['data']['lineItems']);
-        static::assertSame('Test Product', $data['data']['lineItems'][0]['label']);
-        static::assertNotCount(0, $data['data']['transactions']);
-        static::assertNotCount(0, $data['data']['deliveries']);
+        static::assertSame($orderNumber, $data->data['orderNumber']);
+        static::assertNotNull($data->data['status']);
+        static::assertIsFloat($data->data['amountTotal']);
+        static::assertSame('mcp-us1@example.com', $data->data['customer']['email']);
+        static::assertNotCount(0, $data->data['lineItems']);
+        static::assertSame('Test Product', $data->data['lineItems'][0]['label']);
+        static::assertNotCount(0, $data->data['transactions']);
+        static::assertNotCount(0, $data->data['deliveries']);
     }
 }

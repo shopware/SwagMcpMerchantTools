@@ -13,6 +13,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\RequestCriteriaBuilder;
 use Shopware\Core\Framework\Mcp\Attribute\McpToolGroup;
 use Shopware\Core\Framework\Mcp\Attribute\McpToolRequires;
 use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
+use Shopware\Core\Framework\Mcp\Result\McpToolResult;
 use Shopware\Core\Framework\Mcp\Tool\McpEntityIncludes;
 use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
 use Shopware\Core\Framework\Util\Random;
@@ -20,6 +21,7 @@ use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceInterface;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceParameters;
 use Shopware\Core\System\SalesChannel\Entity\SalesChannelRepository;
+use Swag\McpMerchantTools\Mcp\Tool\McpToolResultHelpers;
 
 /**
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
@@ -33,6 +35,8 @@ use Shopware\Core\System\SalesChannel\Entity\SalesChannelRepository;
 class StorefrontSearchTool extends McpToolResponse
 {
     use McpEntityIncludes;
+
+    use McpToolResultHelpers;
 
     /**
      * @internal
@@ -56,14 +60,14 @@ class StorefrontSearchTool extends McpToolResponse
         ?string $customerId = null,
         string $properties = '{}',
         string $term = '',
-    ): string {
+    ): McpToolResult {
         if ($salesChannelId === '') {
-            return $this->error('salesChannelId is required. Use the shopware://sales-channels resource to find available sales channel IDs.');
+            return McpToolResult::failure('salesChannelId is required. Use the shopware://sales-channels resource to find available sales channel IDs.');
         }
 
         $context = $this->contextProvider->getContext();
 
-        if ($error = $this->requirePrivilege($context, 'sales_channel:read')) {
+        if ($error = $this->missingPrivilegeResult($context, 'sales_channel:read')) {
             return $error;
         }
 
@@ -78,7 +82,7 @@ class StorefrontSearchTool extends McpToolResponse
         try {
             $payload = json_decode($criteria, true, 512, \JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
-            return $this->error('Invalid criteria JSON: ' . $e->getMessage());
+            return McpToolResult::failure('Invalid criteria JSON: ' . $e->getMessage());
         }
 
         if ($term !== '') {
@@ -87,7 +91,7 @@ class StorefrontSearchTool extends McpToolResponse
 
         $propertyFilter = $this->resolvePropertyFilters($properties, $salesChannelContext->getContext()->getLanguageIdChain());
 
-        if (\is_string($propertyFilter)) {
+        if ($propertyFilter instanceof McpToolResult) {
             return $propertyFilter;
         }
 
@@ -112,7 +116,7 @@ class StorefrontSearchTool extends McpToolResponse
 
         $encoded = $this->encoder->encode($criteriaObj, $definition, $result->getEntities(), '/api');
 
-        return $this->success($encoded, [
+        return McpToolResult::success($encoded, [
             'total' => $result->getTotal(),
             'page' => $criteriaObj->getOffset() ? (int) ($criteriaObj->getOffset() / $limit) + 1 : 1,
             'limit' => $limit,
@@ -129,15 +133,15 @@ class StorefrontSearchTool extends McpToolResponse
      *
      * @param list<string> $languageIds chain of language IDs to scope translation lookups
      *
-     * @return array<string, mixed>|string filter array, empty array if no properties, or error string
+     * @return array<string, mixed>|McpToolResult filter array, empty array if no properties, or a failure
      */
-    private function resolvePropertyFilters(string $propertiesJson, array $languageIds): array|string
+    private function resolvePropertyFilters(string $propertiesJson, array $languageIds): array|McpToolResult
     {
         try {
             /** @var array<string, string>|null $properties */
             $properties = json_decode($propertiesJson, true, 512, \JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
-            return $this->error('Invalid properties JSON: ' . $e->getMessage());
+            return McpToolResult::failure('Invalid properties JSON: ' . $e->getMessage());
         }
 
         if (!\is_array($properties) || $properties === []) {
@@ -187,7 +191,7 @@ class StorefrontSearchTool extends McpToolResponse
                 $details[] = \sprintf('group "%s" with option "%s"', $groupName, $properties[$groupName]);
             }
 
-            return $this->error('Could not resolve properties: ' . implode(', ', $details) . '. Check spelling or use shopware-entity-search on property_group / property_group_option to find available values.');
+            return McpToolResult::failure('Could not resolve properties: ' . implode(', ', $details) . '. Check spelling or use shopware-entity-search on property_group / property_group_option to find available values.');
         }
 
         $filters = [];

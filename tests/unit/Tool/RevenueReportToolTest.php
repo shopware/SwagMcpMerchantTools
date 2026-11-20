@@ -36,18 +36,16 @@ class RevenueReportToolTest extends TestCase
 
         $output = ($tool)('2025-03-01', '2025-03-02');
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertTrue($data['success']);
-        static::assertSame(['from' => '2025-03-01', 'to' => '2025-03-02'], $data['data']['period']);
-        static::assertEqualsWithDelta(1500.0, $data['data']['totalRevenue'], 0.01);
-        static::assertSame(10, $data['data']['orderCount']);
-        static::assertEqualsWithDelta(150.0, $data['data']['averageOrderValue'], 0.01);
-        static::assertCount(2, $data['data']['timeline']);
-        static::assertSame('2025-03-01', $data['data']['timeline'][0]['date']);
-        static::assertEqualsWithDelta(800.0, $data['data']['timeline'][0]['revenue'], 0.01);
-        static::assertSame('2025-03-02', $data['data']['timeline'][1]['date']);
-        static::assertEqualsWithDelta(700.0, $data['data']['timeline'][1]['revenue'], 0.01);
+        static::assertFalse($output->isError());
+        static::assertSame(['from' => '2025-03-01', 'to' => '2025-03-02'], $output->data['period']);
+        static::assertEqualsWithDelta(1500.0, $output->data['totalRevenue'], 0.01);
+        static::assertSame(10, $output->data['orderCount']);
+        static::assertEqualsWithDelta(150.0, $output->data['averageOrderValue'], 0.01);
+        static::assertCount(2, $output->data['timeline']);
+        static::assertSame('2025-03-01', $output->data['timeline'][0]['date']);
+        static::assertEqualsWithDelta(800.0, $output->data['timeline'][0]['revenue'], 0.01);
+        static::assertSame('2025-03-02', $output->data['timeline'][1]['date']);
+        static::assertEqualsWithDelta(700.0, $output->data['timeline'][1]['revenue'], 0.01);
     }
 
     public function testInvalidGroupByReturnsError(): void
@@ -55,11 +53,10 @@ class RevenueReportToolTest extends TestCase
         $tool = $this->createTool(0, 0, 0, []);
         $output = ($tool)('2025-01-01', '2025-01-31', 'quarter');
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('quarter', $data['error']);
-        static::assertStringContainsString('day, week, month', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('quarter', $output->error->message);
+        static::assertStringContainsString('day, week, month', $output->error->message);
     }
 
     public function testDeniesAccessWithoutPermission(): void
@@ -77,10 +74,9 @@ class RevenueReportToolTest extends TestCase
         $tool = new RevenueReportTool($registry, $contextProvider);
         $output = ($tool)('2025-01-01', '2025-01-31');
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('order:read', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('order:read', $output->error->message);
     }
 
     public function testSalesChannelIdFilterIsApplied(): void
@@ -90,10 +86,9 @@ class RevenueReportToolTest extends TestCase
         ]);
 
         $output = ($tool)('2025-03-01', '2025-03-31', 'day', 'sc-123');
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
 
-        static::assertTrue($data['success']);
-        static::assertEqualsWithDelta(500.0, $data['data']['totalRevenue'], 0.01);
+        static::assertFalse($output->isError());
+        static::assertEqualsWithDelta(500.0, $output->data['totalRevenue'], 0.01);
     }
 
     public function testNonSumResultTimelineBucketFallsBackToZero(): void
@@ -122,11 +117,10 @@ class RevenueReportToolTest extends TestCase
 
         $tool = new RevenueReportTool($registry, $contextProvider);
         $output = ($tool)('2025-03-01', '2025-03-31');
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
 
-        static::assertTrue($data['success']);
-        static::assertCount(1, $data['data']['timeline']);
-        static::assertSame(0, $data['data']['timeline'][0]['revenue']);
+        static::assertFalse($output->isError());
+        static::assertCount(1, $output->data['timeline']);
+        static::assertSame(0, $output->data['timeline'][0]['revenue']);
     }
 
     public function testEmptyResultReturnsZeros(): void
@@ -134,13 +128,11 @@ class RevenueReportToolTest extends TestCase
         $tool = $this->createTool(0, 0, 0, []);
         $output = ($tool)('2025-01-01', '2025-01-31');
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertTrue($data['success']);
-        static::assertEqualsWithDelta(0.0, $data['data']['totalRevenue'], 0.01);
-        static::assertSame(0, $data['data']['orderCount']);
-        static::assertEqualsWithDelta(0.0, $data['data']['averageOrderValue'], 0.01);
-        static::assertSame([], $data['data']['timeline']);
+        static::assertFalse($output->isError());
+        static::assertEqualsWithDelta(0.0, $output->data['totalRevenue'], 0.01);
+        static::assertSame(0, $output->data['orderCount']);
+        static::assertEqualsWithDelta(0.0, $output->data['averageOrderValue'], 0.01);
+        static::assertSame([], $output->data['timeline']);
     }
 
     /**

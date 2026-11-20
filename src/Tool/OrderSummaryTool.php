@@ -13,7 +13,9 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\Mcp\Attribute\McpToolGroup;
 use Shopware\Core\Framework\Mcp\Attribute\McpToolRequires;
 use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
+use Shopware\Core\Framework\Mcp\Result\McpToolResult;
 use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
+use Swag\McpMerchantTools\Mcp\Tool\McpToolResultHelpers;
 
 /**
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
@@ -23,6 +25,8 @@ use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
 #[McpToolRequires('order:read')]
 class OrderSummaryTool extends McpToolResponse
 {
+    use McpToolResultHelpers;
+
     /**
      * @internal
      */
@@ -32,15 +36,15 @@ class OrderSummaryTool extends McpToolResponse
     ) {
     }
 
-    public function __invoke(string $orderNumber = '', string $orderId = ''): string
+    public function __invoke(string $orderNumber = '', string $orderId = ''): McpToolResult
     {
         if ($orderNumber === '' && $orderId === '') {
-            return $this->error('Provide either orderNumber or orderId.');
+            return McpToolResult::failure('Provide either orderNumber or orderId.');
         }
 
         $context = $this->contextProvider->getContext();
 
-        if ($error = $this->requirePrivilege($context, 'order:read')) {
+        if ($error = $this->missingPrivilegeResult($context, 'order:read')) {
             return $error;
         }
 
@@ -67,7 +71,7 @@ class OrderSummaryTool extends McpToolResponse
         $order = $result->getEntities()->first();
 
         if (!$order instanceof OrderEntity) {
-            return $this->error('Order not found.');
+            return McpToolResult::failure('Order not found.');
         }
 
         $lineItems = [];
@@ -99,7 +103,7 @@ class OrderSummaryTool extends McpToolResponse
             ];
         }
 
-        return $this->success([
+        return McpToolResult::success([
             'id' => $order->getId(),
             'orderNumber' => $order->getOrderNumber(),
             'orderDateTime' => $order->getOrderDateTime()->format('c'),

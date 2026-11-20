@@ -22,6 +22,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\IdSearchResult;
 use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
+use Shopware\Core\Framework\Mcp\Result\McpToolError;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceInterface;
@@ -51,15 +52,14 @@ class CartCheckoutToolTest extends TestCase
             dryRun: true,
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-        static::assertTrue($data['success']);
-        static::assertTrue($data['_meta']['dryRun']);
-        static::assertSame('test-token', $data['data']['token']);
-        static::assertCount(1, $data['data']['lineItems']);
-        static::assertSame('Blue T-Shirt', $data['data']['lineItems'][0]['label']);
-        static::assertEqualsWithDelta(59.98, $data['data']['totalPrice'], 0.001);
-        static::assertSame($paymentMethodId, $data['data']['paymentMethodId']);
-        static::assertSame($shippingMethodId, $data['data']['shippingMethodId']);
+        static::assertFalse($output->isError());
+        static::assertTrue($output->meta['dryRun']);
+        static::assertSame('test-token', $output->data['token']);
+        static::assertCount(1, $output->data['lineItems']);
+        static::assertSame('Blue T-Shirt', $output->data['lineItems'][0]['label']);
+        static::assertEqualsWithDelta(59.98, $output->data['totalPrice'], 0.001);
+        static::assertSame($paymentMethodId, $output->data['paymentMethodId']);
+        static::assertSame($shippingMethodId, $output->data['shippingMethodId']);
     }
 
     public function testOrderPlacementReturnsOrderId(): void
@@ -82,10 +82,9 @@ class CartCheckoutToolTest extends TestCase
             dryRun: false,
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-        static::assertTrue($data['success']);
-        static::assertFalse($data['_meta']['dryRun']);
-        static::assertSame($orderId, $data['data']['orderId']);
+        static::assertFalse($output->isError());
+        static::assertFalse($output->meta['dryRun']);
+        static::assertSame($orderId, $output->data['orderId']);
     }
 
     public function testOrderPlacementWithCustomPaymentAndShippingIds(): void
@@ -124,10 +123,9 @@ class CartCheckoutToolTest extends TestCase
             dryRun: false,
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-        static::assertTrue($data['success']);
-        static::assertFalse($data['_meta']['dryRun']);
-        static::assertSame($orderId, $data['data']['orderId']);
+        static::assertFalse($output->isError());
+        static::assertFalse($output->meta['dryRun']);
+        static::assertSame($orderId, $output->data['orderId']);
     }
 
     public function testEmptyCartReturnsError(): void
@@ -151,9 +149,9 @@ class CartCheckoutToolTest extends TestCase
             customerId: Uuid::randomHex(),
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('Cart is empty', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('Cart is empty', $output->error->message);
     }
 
     public function testCustomPaymentMethodIdIsUsedInPreview(): void
@@ -171,8 +169,7 @@ class CartCheckoutToolTest extends TestCase
             dryRun: true,
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-        static::assertSame($customPaymentId, $data['data']['paymentMethodId']);
+        static::assertSame($customPaymentId, $output->data['paymentMethodId']);
     }
 
     public function testOrderExceptionReturnsError(): void
@@ -192,10 +189,9 @@ class CartCheckoutToolTest extends TestCase
             dryRun: false,
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('Payment failed', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('Payment failed', $output->error->message);
     }
 
     public function testDeniesAccessWithoutPermission(): void
@@ -220,10 +216,10 @@ class CartCheckoutToolTest extends TestCase
             customerId: Uuid::randomHex(),
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('Missing privilege', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('Missing privilege', $output->error->message);
+        static::assertSame(McpToolError::MISSING_PRIVILEGE, $output->error->code);
     }
 
     private function createTool(Cart $cart, string $paymentMethodId, string $shippingMethodId, (CartService&MockObject)|null $cartService = null): CartCheckoutTool

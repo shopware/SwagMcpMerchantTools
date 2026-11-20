@@ -11,10 +11,12 @@ use Shopware\Core\Framework\Mcp\Attribute\McpToolDependsOn;
 use Shopware\Core\Framework\Mcp\Attribute\McpToolGroup;
 use Shopware\Core\Framework\Mcp\Attribute\McpToolRequires;
 use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
+use Shopware\Core\Framework\Mcp\Result\McpToolResult;
 use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
 use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceInterface;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceParameters;
+use Swag\McpMerchantTools\Mcp\Tool\McpToolResultHelpers;
 
 /**
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
@@ -26,6 +28,8 @@ use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceParamete
 #[McpToolRequires('order:create')]
 class CartCheckoutTool extends McpToolResponse
 {
+    use McpToolResultHelpers;
+
     /**
      * @internal
      */
@@ -44,10 +48,10 @@ class CartCheckoutTool extends McpToolResponse
         string $paymentMethodId = '',
         string $shippingMethodId = '',
         bool $dryRun = true,
-    ): string {
+    ): McpToolResult {
         $context = $this->contextProvider->getContext();
 
-        if ($error = $this->requirePrivilege($context, 'sales_channel:read', 'order:create')) {
+        if ($error = $this->missingPrivilegeResult($context, 'sales_channel:read', 'order:create')) {
             return $error;
         }
 
@@ -62,7 +66,7 @@ class CartCheckoutTool extends McpToolResponse
                 $criteria = new Criteria([$paymentMethodId]);
                 $criteria->addFilter(new EqualsFilter('salesChannels.id', $salesChannelId));
                 if ($this->registry->getRepository('payment_method')->searchIds($criteria, $context)->firstId() === null) {
-                    return $this->error(\sprintf('Payment method "%s" does not exist or is not available in this sales channel.', $paymentMethodId));
+                    return McpToolResult::failure(\sprintf('Payment method "%s" does not exist or is not available in this sales channel.', $paymentMethodId));
                 }
             }
 
@@ -70,14 +74,14 @@ class CartCheckoutTool extends McpToolResponse
                 $criteria = new Criteria([$shippingMethodId]);
                 $criteria->addFilter(new EqualsFilter('salesChannels.id', $salesChannelId));
                 if ($this->registry->getRepository('shipping_method')->searchIds($criteria, $context)->firstId() === null) {
-                    return $this->error(\sprintf('Shipping method "%s" does not exist or is not available in this sales channel.', $shippingMethodId));
+                    return McpToolResult::failure(\sprintf('Shipping method "%s" does not exist or is not available in this sales channel.', $shippingMethodId));
                 }
             }
 
             $cart = $this->cartService->getCart($token, $salesChannelContext);
 
             if ($cart->getLineItems()->count() === 0) {
-                return $this->error('Cart is empty. Add items with merchant-cart-manage first.');
+                return McpToolResult::failure('Cart is empty. Add items with merchant-cart-manage first.');
             }
 
             $lineItems = [];
@@ -99,7 +103,7 @@ class CartCheckoutTool extends McpToolResponse
                     $meta['note'] = 'Shipping cost in this preview reflects the context default, not the requested shippingMethodId. Totals may differ on commit.';
                 }
 
-                return $this->success([
+                return McpToolResult::success([
                     'token' => $token,
                     'customerId' => $customerId,
                     'lineItems' => $lineItems,
@@ -121,13 +125,13 @@ class CartCheckoutTool extends McpToolResponse
 
             $orderId = $this->cartService->order($cart, $salesChannelContext, new RequestDataBag($data));
 
-            return $this->success([
+            return McpToolResult::success([
                 'orderId' => $orderId,
                 'totalPrice' => $cart->getPrice()->getTotalPrice(),
                 'itemCount' => \count($lineItems),
             ], ['dryRun' => false]);
         } catch (\Throwable $e) {
-            return $this->error($e->getMessage());
+            return McpToolResult::failure($e->getMessage());
         }
     }
 }

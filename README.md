@@ -7,7 +7,7 @@ Merchant workflow MCP tools for Shopware. Extends the built-in MCP server with h
 
 ## Requirements
 
-- Shopware 6.7+
+- Shopware 6.7.16+
 - `MCP_SERVER=1` in `.env`
 
 ## Tools

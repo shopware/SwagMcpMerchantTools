@@ -17,6 +17,7 @@ use Shopware\Core\Defaults;
 use Shopware\Core\Framework\Api\Context\AdminApiSource;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
+use Shopware\Core\Framework\Mcp\Result\McpToolError;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceInterface;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
@@ -45,13 +46,12 @@ class CartManageToolTest extends TestCase
             action: 'create',
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-        static::assertTrue($data['success']);
-        static::assertIsString($data['data']['token']);
-        static::assertNotSame('', $data['data']['token']);
-        static::assertSame([], $data['data']['lineItems']);
-        static::assertEqualsWithDelta(0.0, $data['data']['totalPrice'], 0.001);
-        static::assertSame(0, $data['data']['itemCount']);
+        static::assertFalse($output->isError());
+        static::assertIsString($output->data['token']);
+        static::assertNotSame('', $output->data['token']);
+        static::assertSame([], $output->data['lineItems']);
+        static::assertEqualsWithDelta(0.0, $output->data['totalPrice'], 0.001);
+        static::assertSame(0, $output->data['itemCount']);
     }
 
     public function testAddReturnsFormattedCart(): void
@@ -74,14 +74,13 @@ class CartManageToolTest extends TestCase
             quantity: 2,
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-        static::assertTrue($data['success']);
-        static::assertSame('test-token', $data['data']['token']);
-        static::assertCount(1, $data['data']['lineItems']);
-        static::assertSame('Blue T-Shirt', $data['data']['lineItems'][0]['label']);
-        static::assertSame(2, $data['data']['lineItems'][0]['quantity']);
-        static::assertEqualsWithDelta(59.98, $data['data']['totalPrice'], 0.001);
-        static::assertSame(1, $data['data']['itemCount']);
+        static::assertFalse($output->isError());
+        static::assertSame('test-token', $output->data['token']);
+        static::assertCount(1, $output->data['lineItems']);
+        static::assertSame('Blue T-Shirt', $output->data['lineItems'][0]['label']);
+        static::assertSame(2, $output->data['lineItems'][0]['quantity']);
+        static::assertEqualsWithDelta(59.98, $output->data['totalPrice'], 0.001);
+        static::assertSame(1, $output->data['itemCount']);
     }
 
     public function testRemoveReturnsFormattedCart(): void
@@ -99,9 +98,8 @@ class CartManageToolTest extends TestCase
             lineItemId: 'some-item-id',
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-        static::assertTrue($data['success']);
-        static::assertSame(0, $data['data']['itemCount']);
+        static::assertFalse($output->isError());
+        static::assertSame(0, $output->data['itemCount']);
     }
 
     public function testUpdateReturnsFormattedCart(): void
@@ -124,9 +122,8 @@ class CartManageToolTest extends TestCase
             quantity: 5,
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-        static::assertTrue($data['success']);
-        static::assertSame(5, $data['data']['lineItems'][0]['quantity']);
+        static::assertFalse($output->isError());
+        static::assertSame(5, $output->data['lineItems'][0]['quantity']);
     }
 
     public function testGetReturnsCurrentCartState(): void
@@ -142,9 +139,8 @@ class CartManageToolTest extends TestCase
             token: 'test-token',
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-        static::assertTrue($data['success']);
-        static::assertSame('test-token', $data['data']['token']);
+        static::assertFalse($output->isError());
+        static::assertSame('test-token', $output->data['token']);
     }
 
     public function testMissingTokenReturnsError(): void
@@ -156,9 +152,9 @@ class CartManageToolTest extends TestCase
             action: 'add',
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('Token is required', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('Token is required', $output->error->message);
     }
 
     public function testMissingProductIdForAddReturnsError(): void
@@ -171,9 +167,9 @@ class CartManageToolTest extends TestCase
             token: 'test-token',
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('productId is required', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('productId is required', $output->error->message);
     }
 
     public function testInvalidActionReturnsError(): void
@@ -185,9 +181,9 @@ class CartManageToolTest extends TestCase
             action: 'invalid',
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('Invalid action', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('Invalid action', $output->error->message);
     }
 
     public function testExceptionInCartServiceReturnsError(): void
@@ -202,9 +198,9 @@ class CartManageToolTest extends TestCase
             token: 'expired-token',
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('Cart expired', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('Cart expired', $output->error->message);
     }
 
     public function testDeniesAccessWithoutPermission(): void
@@ -227,9 +223,10 @@ class CartManageToolTest extends TestCase
             action: 'create',
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('Missing privilege', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('Missing privilege', $output->error->message);
+        static::assertSame(McpToolError::MISSING_PRIVILEGE, $output->error->code);
     }
 
     public function testMissingLineItemIdForRemoveReturnsError(): void
@@ -242,9 +239,9 @@ class CartManageToolTest extends TestCase
             token: 'test-token',
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('lineItemId is required', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('lineItemId is required', $output->error->message);
     }
 
     public function testMissingLineItemIdForUpdateReturnsError(): void
@@ -257,9 +254,9 @@ class CartManageToolTest extends TestCase
             token: 'test-token',
         );
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('lineItemId is required', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('lineItemId is required', $output->error->message);
     }
 
     private function createTool(): CartManageTool
