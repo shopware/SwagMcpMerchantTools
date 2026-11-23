@@ -50,13 +50,12 @@ class BestsellerReportToolTest extends TestCase
         );
 
         $output = ($tool)('2025-01-01', '2025-01-31');
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
 
-        static::assertTrue($data['success']);
-        static::assertSame(['from' => '2025-01-01', 'to' => '2025-01-31'], $data['data']['period']);
-        static::assertCount(2, $data['data']['bestsellers']);
+        static::assertFalse($output->isError());
+        static::assertSame(['from' => '2025-01-01', 'to' => '2025-01-31'], $output->data['period']);
+        static::assertCount(2, $output->data['bestsellers']);
 
-        $first = $data['data']['bestsellers'][0];
+        $first = $output->data['bestsellers'][0];
         static::assertSame($productA, $first['productId']);
         static::assertSame('SW-001', $first['productNumber']);
         static::assertSame('Red Shoes', $first['name']);
@@ -64,7 +63,7 @@ class BestsellerReportToolTest extends TestCase
         static::assertSame(5, $first['orderCount']);
         static::assertEqualsWithDelta(400.0, $first['totalRevenue'], 0.01);
 
-        $second = $data['data']['bestsellers'][1];
+        $second = $output->data['bestsellers'][1];
         static::assertSame($productB, $second['productId']);
         static::assertSame(2, $second['totalQuantity']);
     }
@@ -89,11 +88,10 @@ class BestsellerReportToolTest extends TestCase
         );
 
         $output = ($tool)('2025-01-01', '2025-01-31', limit: 1);
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
 
-        static::assertTrue($data['success']);
-        static::assertCount(1, $data['data']['bestsellers']);
-        static::assertSame($productA, $data['data']['bestsellers'][0]['productId']);
+        static::assertFalse($output->isError());
+        static::assertCount(1, $output->data['bestsellers']);
+        static::assertSame($productA, $output->data['bestsellers'][0]['productId']);
     }
 
     public function testDeniesAccessWithoutPermission(): void
@@ -111,10 +109,9 @@ class BestsellerReportToolTest extends TestCase
         $tool = new BestsellerReportTool($registry, $contextProvider);
         $output = ($tool)('2025-01-01', '2025-01-31');
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('order:read', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('order:read', $output->error->message);
     }
 
     public function testDeniesAccessWithoutProductReadWhenOrderReadGranted(): void
@@ -132,10 +129,9 @@ class BestsellerReportToolTest extends TestCase
         $tool = new BestsellerReportTool($registry, $contextProvider);
         $output = ($tool)('2025-01-01', '2025-01-31');
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('product:read', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('product:read', $output->error->message);
     }
 
     public function testLimitOutOfRangeReturnsError(): void
@@ -143,10 +139,10 @@ class BestsellerReportToolTest extends TestCase
         $tool = $this->createTool(bestsellerBuckets: [], revenueBuckets: [], products: []);
 
         $output = ($tool)('2025-01-01', '2025-01-31', limit: 0);
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
 
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('between 1 and 100', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('between 1 and 100', $output->error->message);
     }
 
     public function testNonSumResultAggregationFallsBackToZero(): void
@@ -186,12 +182,11 @@ class BestsellerReportToolTest extends TestCase
 
         $tool = new BestsellerReportTool($registry, $contextProvider);
         $output = ($tool)('2025-01-01', '2025-01-31');
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
 
-        static::assertTrue($data['success']);
-        static::assertCount(1, $data['data']['bestsellers']);
-        static::assertSame(0, $data['data']['bestsellers'][0]['totalQuantity']);
-        static::assertSame(0, $data['data']['bestsellers'][0]['totalRevenue']);
+        static::assertFalse($output->isError());
+        static::assertCount(1, $output->data['bestsellers']);
+        static::assertSame(0, $output->data['bestsellers'][0]['totalQuantity']);
+        static::assertSame(0, $output->data['bestsellers'][0]['totalRevenue']);
     }
 
     public function testSalesChannelIdFilterIsApplied(): void
@@ -245,10 +240,9 @@ class BestsellerReportToolTest extends TestCase
 
         $tool = new BestsellerReportTool($registry, $contextProvider);
         $output = ($tool)('2025-01-01', '2025-01-31', 10, $salesChannelId);
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
 
-        static::assertTrue($data['success']);
-        static::assertCount(1, $data['data']['bestsellers']);
+        static::assertFalse($output->isError());
+        static::assertCount(1, $output->data['bestsellers']);
     }
 
     public function testEmptyResultReturnsEmptyBestsellers(): void
@@ -256,11 +250,10 @@ class BestsellerReportToolTest extends TestCase
         $tool = $this->createTool(bestsellerBuckets: [], revenueBuckets: [], products: []);
 
         $output = ($tool)('2025-01-01', '2025-01-31');
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
 
-        static::assertTrue($data['success']);
-        static::assertSame([], $data['data']['bestsellers']);
-        static::assertSame(['from' => '2025-01-01', 'to' => '2025-01-31'], $data['data']['period']);
+        static::assertFalse($output->isError());
+        static::assertSame([], $output->data['bestsellers']);
+        static::assertSame(['from' => '2025-01-01', 'to' => '2025-01-31'], $output->data['period']);
     }
 
     /**

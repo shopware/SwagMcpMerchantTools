@@ -43,20 +43,18 @@ class OrderSummaryToolTest extends TestCase
         $tool = $this->createTool($order);
         $output = ($tool)(orderNumber: '10001');
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertTrue($data['success']);
-        static::assertSame($orderId, $data['data']['id']);
-        static::assertSame('10001', $data['data']['orderNumber']);
-        static::assertSame('open', $data['data']['status']);
-        static::assertSame(99.99, $data['data']['amountTotal']);
-        static::assertSame('EUR', $data['data']['currencyIsoCode']);
-        static::assertSame('john@example.com', $data['data']['customer']['email']);
-        static::assertCount(1, $data['data']['lineItems']);
-        static::assertSame('T-Shirt', $data['data']['lineItems'][0]['label']);
-        static::assertCount(1, $data['data']['transactions']);
-        static::assertSame('open', $data['data']['transactions'][0]['status']);
-        static::assertCount(1, $data['data']['deliveries']);
+        static::assertFalse($output->isError());
+        static::assertSame($orderId, $output->data['id']);
+        static::assertSame('10001', $output->data['orderNumber']);
+        static::assertSame('open', $output->data['status']);
+        static::assertSame(99.99, $output->data['amountTotal']);
+        static::assertSame('EUR', $output->data['currencyIsoCode']);
+        static::assertSame('john@example.com', $output->data['customer']['email']);
+        static::assertCount(1, $output->data['lineItems']);
+        static::assertSame('T-Shirt', $output->data['lineItems'][0]['label']);
+        static::assertCount(1, $output->data['transactions']);
+        static::assertSame('open', $output->data['transactions'][0]['status']);
+        static::assertCount(1, $output->data['deliveries']);
     }
 
     public function testLookupByOrderId(): void
@@ -67,10 +65,8 @@ class OrderSummaryToolTest extends TestCase
         $tool = $this->createTool($order);
         $output = ($tool)(orderId: $orderId);
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertTrue($data['success']);
-        static::assertSame($orderId, $data['data']['id']);
+        static::assertFalse($output->isError());
+        static::assertSame($orderId, $output->data['id']);
     }
 
     public function testOrderIdTakesPriorityWhenBothProvided(): void
@@ -97,10 +93,8 @@ class OrderSummaryToolTest extends TestCase
         $tool = new OrderSummaryTool($registry, $contextProvider);
         $output = ($tool)(orderNumber: '99999', orderId: $orderId);
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertTrue($data['success']);
-        static::assertSame($orderId, $data['data']['id']);
+        static::assertFalse($output->isError());
+        static::assertSame($orderId, $output->data['id']);
     }
 
     public function testNotFoundReturnsError(): void
@@ -108,10 +102,9 @@ class OrderSummaryToolTest extends TestCase
         $tool = $this->createTool(null);
         $output = ($tool)(orderNumber: '99999');
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertFalse($data['success']);
-        static::assertSame('Order not found.', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertSame('Order not found.', $output->error->message);
     }
 
     public function testNoIdentifierReturnsError(): void
@@ -119,10 +112,9 @@ class OrderSummaryToolTest extends TestCase
         $tool = $this->createTool(null);
         $output = ($tool)();
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('orderNumber or orderId', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('orderNumber or orderId', $output->error->message);
     }
 
     public function testDeniesAccessWithoutPermission(): void
@@ -140,10 +132,9 @@ class OrderSummaryToolTest extends TestCase
         $tool = new OrderSummaryTool($registry, $contextProvider);
         $output = ($tool)(orderNumber: '10001');
 
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
-
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('order:read', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('order:read', $output->error->message);
     }
 
     private function createTool(?OrderEntity $order): OrderSummaryTool

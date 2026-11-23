@@ -20,7 +20,9 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\RangeFilter;
 use Shopware\Core\Framework\Mcp\Attribute\McpToolGroup;
 use Shopware\Core\Framework\Mcp\Attribute\McpToolRequires;
 use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
+use Shopware\Core\Framework\Mcp\Result\McpToolResult;
 use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
+use Swag\McpMerchantTools\Mcp\Tool\McpToolResultHelpers;
 
 /**
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
@@ -30,6 +32,8 @@ use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
 #[McpToolRequires('order:read')]
 class RevenueReportTool extends McpToolResponse
 {
+    use McpToolResultHelpers;
+
     /**
      * @internal
      */
@@ -39,25 +43,25 @@ class RevenueReportTool extends McpToolResponse
     ) {
     }
 
-    public function __invoke(string $from, string $to, string $groupBy = 'day', string $salesChannelId = '', int $page = 1, int $limit = 31): string
+    public function __invoke(string $from, string $to, string $groupBy = 'day', string $salesChannelId = '', int $page = 1, int $limit = 31): McpToolResult
     {
         $context = $this->contextProvider->getContext();
 
-        if ($error = $this->requirePrivilege($context, 'order:read')) {
+        if ($error = $this->missingPrivilegeResult($context, 'order:read')) {
             return $error;
         }
 
         $interval = RevenueGroupBy::tryFrom($groupBy);
         if ($interval === null) {
-            return $this->error(\sprintf('Invalid groupBy value "%s". Allowed: %s', $groupBy, implode(', ', array_column(RevenueGroupBy::cases(), 'value'))));
+            return McpToolResult::failure(\sprintf('Invalid groupBy value "%s". Allowed: %s', $groupBy, implode(', ', array_column(RevenueGroupBy::cases(), 'value'))));
         }
 
         if ($page < 1) {
-            return $this->error('page must be >= 1.');
+            return McpToolResult::failure('page must be >= 1.');
         }
 
         if ($limit < 1 || $limit > 366) {
-            return $this->error('limit must be between 1 and 366.');
+            return McpToolResult::failure('limit must be between 1 and 366.');
         }
 
         $criteria = new Criteria();
@@ -117,7 +121,7 @@ class RevenueReportTool extends McpToolResponse
         $offset = ($page - 1) * $limit;
         $timelineData = \array_slice($timelineData, $offset, $limit);
 
-        return $this->success([
+        return McpToolResult::success([
             'period' => ['from' => $from, 'to' => $to],
             'totalRevenue' => $revenue instanceof SumResult ? $revenue->getSum() : 0,
             'orderCount' => $orderCount instanceof CountResult ? $orderCount->getCount() : 0,

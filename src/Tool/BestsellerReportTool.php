@@ -18,7 +18,9 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\RangeFilter;
 use Shopware\Core\Framework\Mcp\Attribute\McpToolGroup;
 use Shopware\Core\Framework\Mcp\Attribute\McpToolRequires;
 use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
+use Shopware\Core\Framework\Mcp\Result\McpToolResult;
 use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
+use Swag\McpMerchantTools\Mcp\Tool\McpToolResultHelpers;
 
 /**
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
@@ -29,6 +31,8 @@ use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
 #[McpToolRequires('product:read')]
 class BestsellerReportTool extends McpToolResponse
 {
+    use McpToolResultHelpers;
+
     /**
      * @internal
      */
@@ -38,16 +42,16 @@ class BestsellerReportTool extends McpToolResponse
     ) {
     }
 
-    public function __invoke(string $from, string $to, int $limit = 10, string $salesChannelId = ''): string
+    public function __invoke(string $from, string $to, int $limit = 10, string $salesChannelId = ''): McpToolResult
     {
         $context = $this->contextProvider->getContext();
 
-        if ($error = $this->requirePrivilege($context, 'order:read', 'product:read')) {
+        if ($error = $this->missingPrivilegeResult($context, 'order:read', 'product:read')) {
             return $error;
         }
 
         if ($limit < 1 || $limit > 100) {
-            return $this->error('Limit must be between 1 and 100.');
+            return McpToolResult::failure('Limit must be between 1 and 100.');
         }
 
         $criteria = new Criteria();
@@ -104,7 +108,7 @@ class BestsellerReportTool extends McpToolResponse
         }
 
         if (!$bestsellers instanceof TermsResult || $bestsellers->getBuckets() === []) {
-            return $this->success([
+            return McpToolResult::success([
                 'period' => ['from' => $from, 'to' => $to],
                 'bestsellers' => [],
             ]);
@@ -144,7 +148,7 @@ class BestsellerReportTool extends McpToolResponse
             ];
         }
 
-        return $this->success([
+        return McpToolResult::success([
             'period' => ['from' => $from, 'to' => $to],
             'bestsellers' => $bestsellersData,
         ]);

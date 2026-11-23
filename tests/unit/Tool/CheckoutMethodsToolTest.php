@@ -18,6 +18,7 @@ use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
 use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
+use Shopware\Core\Framework\Mcp\Result\McpToolError;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceInterface;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
@@ -37,13 +38,12 @@ class CheckoutMethodsToolTest extends TestCase
         );
 
         $output = ($tool)(salesChannelId: Uuid::randomHex(), type: 'payment');
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
 
-        static::assertTrue($data['success']);
-        static::assertArrayHasKey('paymentMethods', $data['data']);
-        static::assertArrayNotHasKey('shippingMethods', $data['data']);
-        static::assertCount(2, $data['data']['paymentMethods']);
-        static::assertSame('Invoice', $data['data']['paymentMethods'][0]['name']);
+        static::assertFalse($output->isError());
+        static::assertArrayHasKey('paymentMethods', $output->data);
+        static::assertArrayNotHasKey('shippingMethods', $output->data);
+        static::assertCount(2, $output->data['paymentMethods']);
+        static::assertSame('Invoice', $output->data['paymentMethods'][0]['name']);
     }
 
     public function testShippingTypeReturnsOnlyShippingMethods(): void
@@ -54,13 +54,12 @@ class CheckoutMethodsToolTest extends TestCase
         );
 
         $output = ($tool)(salesChannelId: Uuid::randomHex(), type: 'shipping');
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
 
-        static::assertTrue($data['success']);
-        static::assertArrayNotHasKey('paymentMethods', $data['data']);
-        static::assertArrayHasKey('shippingMethods', $data['data']);
-        static::assertCount(1, $data['data']['shippingMethods']);
-        static::assertSame('Standard Shipping', $data['data']['shippingMethods'][0]['name']);
+        static::assertFalse($output->isError());
+        static::assertArrayNotHasKey('paymentMethods', $output->data);
+        static::assertArrayHasKey('shippingMethods', $output->data);
+        static::assertCount(1, $output->data['shippingMethods']);
+        static::assertSame('Standard Shipping', $output->data['shippingMethods'][0]['name']);
     }
 
     public function testAllTypeReturnsBoth(): void
@@ -71,11 +70,10 @@ class CheckoutMethodsToolTest extends TestCase
         );
 
         $output = ($tool)(salesChannelId: Uuid::randomHex(), type: 'all');
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
 
-        static::assertTrue($data['success']);
-        static::assertArrayHasKey('paymentMethods', $data['data']);
-        static::assertArrayHasKey('shippingMethods', $data['data']);
+        static::assertFalse($output->isError());
+        static::assertArrayHasKey('paymentMethods', $output->data);
+        static::assertArrayHasKey('shippingMethods', $output->data);
     }
 
     public function testEmptyMethodsLists(): void
@@ -86,11 +84,10 @@ class CheckoutMethodsToolTest extends TestCase
         );
 
         $output = ($tool)(salesChannelId: Uuid::randomHex(), type: 'all');
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
 
-        static::assertTrue($data['success']);
-        static::assertSame([], $data['data']['paymentMethods']);
-        static::assertSame([], $data['data']['shippingMethods']);
+        static::assertFalse($output->isError());
+        static::assertSame([], $output->data['paymentMethods']);
+        static::assertSame([], $output->data['shippingMethods']);
     }
 
     public function testDeniesAccessWithoutPermission(): void
@@ -110,10 +107,11 @@ class CheckoutMethodsToolTest extends TestCase
         );
 
         $output = ($tool)(salesChannelId: Uuid::randomHex(), type: 'all');
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
 
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('Missing privilege', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('Missing privilege', $output->error->message);
+        static::assertSame(McpToolError::MISSING_PRIVILEGE, $output->error->code);
     }
 
     public function testExceptionInRouteReturnsError(): void
@@ -132,10 +130,10 @@ class CheckoutMethodsToolTest extends TestCase
         );
 
         $output = ($tool)(salesChannelId: 'bad-id', type: 'all');
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
 
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('Sales channel not found', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('Sales channel not found', $output->error->message);
     }
 
     public function testInvalidTypeReturnsError(): void
@@ -146,10 +144,10 @@ class CheckoutMethodsToolTest extends TestCase
         );
 
         $output = ($tool)(salesChannelId: Uuid::randomHex(), type: 'invalid');
-        $data = json_decode($output, true, 512, \JSON_THROW_ON_ERROR);
 
-        static::assertFalse($data['success']);
-        static::assertStringContainsString('Invalid type', $data['error']);
+        static::assertTrue($output->isError());
+        static::assertNotNull($output->error);
+        static::assertStringContainsString('Invalid type', $output->error->message);
     }
 
     private function createTool(PaymentMethodCollection $paymentMethods, ShippingMethodCollection $shippingMethods): CheckoutMethodsTool
