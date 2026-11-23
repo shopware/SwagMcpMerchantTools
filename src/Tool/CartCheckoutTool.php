@@ -16,7 +16,7 @@ use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
 use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceInterface;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceParameters;
-use Swag\McpMerchantTools\Mcp\Tool\McpToolResultHelpers;
+use Swag\McpMerchantTools\Tool\Concern\RequiresPrivileges;
 
 /**
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
@@ -28,7 +28,7 @@ use Swag\McpMerchantTools\Mcp\Tool\McpToolResultHelpers;
 #[McpToolRequires('order:create')]
 class CartCheckoutTool extends McpToolResponse
 {
-    use McpToolResultHelpers;
+    use RequiresPrivileges;
 
     /**
      * @internal
@@ -51,7 +51,7 @@ class CartCheckoutTool extends McpToolResponse
     ): McpToolResult {
         $context = $this->contextProvider->getContext();
 
-        if ($error = $this->missingPrivilegeResult($context, 'sales_channel:read', 'order:create')) {
+        if ($error = $this->requirePrivilegeResult($context, 'sales_channel:read', 'order:create')) {
             return $error;
         }
 

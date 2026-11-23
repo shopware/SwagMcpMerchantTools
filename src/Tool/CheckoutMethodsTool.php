@@ -16,7 +16,7 @@ use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
 use Shopware\Core\Framework\Util\Random;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceInterface;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceParameters;
-use Swag\McpMerchantTools\Mcp\Tool\McpToolResultHelpers;
+use Swag\McpMerchantTools\Tool\Concern\RequiresPrivileges;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -27,7 +27,7 @@ use Symfony\Component\HttpFoundation\Request;
 #[McpToolRequires('sales_channel:read')]
 class CheckoutMethodsTool extends McpToolResponse
 {
-    use McpToolResultHelpers;
+    use RequiresPrivileges;
 
     /**
      * @internal
@@ -46,7 +46,7 @@ class CheckoutMethodsTool extends McpToolResponse
     ): McpToolResult {
         $context = $this->contextProvider->getContext();
 
-        if ($error = $this->missingPrivilegeResult($context, 'sales_channel:read')) {
+        if ($error = $this->requirePrivilegeResult($context, 'sales_channel:read')) {
             return $error;
         }
 

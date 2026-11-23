@@ -20,7 +20,7 @@ use Shopware\Core\Framework\Mcp\Attribute\McpToolRequires;
 use Shopware\Core\Framework\Mcp\Context\McpContextProvider;
 use Shopware\Core\Framework\Mcp\Result\McpToolResult;
 use Shopware\Core\Framework\Mcp\Tool\McpToolResponse;
-use Swag\McpMerchantTools\Mcp\Tool\McpToolResultHelpers;
+use Swag\McpMerchantTools\Tool\Concern\RequiresPrivileges;
 
 /**
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
@@ -31,7 +31,7 @@ use Swag\McpMerchantTools\Mcp\Tool\McpToolResultHelpers;
 #[McpToolRequires('product:read')]
 class BestsellerReportTool extends McpToolResponse
 {
-    use McpToolResultHelpers;
+    use RequiresPrivileges;
 
     /**
      * @internal
@@ -46,7 +46,7 @@ class BestsellerReportTool extends McpToolResponse
     {
         $context = $this->contextProvider->getContext();
 
-        if ($error = $this->missingPrivilegeResult($context, 'order:read', 'product:read')) {
+        if ($error = $this->requirePrivilegeResult($context, 'order:read', 'product:read')) {
             return $error;
         }
 

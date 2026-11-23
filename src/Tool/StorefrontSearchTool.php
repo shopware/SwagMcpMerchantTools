@@ -21,7 +21,7 @@ use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceInterface;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceParameters;
 use Shopware\Core\System\SalesChannel\Entity\SalesChannelRepository;
-use Swag\McpMerchantTools\Mcp\Tool\McpToolResultHelpers;
+use Swag\McpMerchantTools\Tool\Concern\RequiresPrivileges;
 
 /**
  * @experimental stableVersion:v6.8.0 feature:MCP_SERVER
@@ -36,7 +36,7 @@ class StorefrontSearchTool extends McpToolResponse
 {
     use McpEntityIncludes;
 
-    use McpToolResultHelpers;
+    use RequiresPrivileges;
 
     /**
      * @internal
@@ -67,7 +67,7 @@ class StorefrontSearchTool extends McpToolResponse
 
         $context = $this->contextProvider->getContext();
 
-        if ($error = $this->missingPrivilegeResult($context, 'sales_channel:read')) {
+        if ($error = $this->requirePrivilegeResult($context, 'sales_channel:read')) {
             return $error;
         }
 
